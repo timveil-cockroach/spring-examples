@@ -1,0 +1,7 @@
+*.iml
+.idea
+
+# Project exclude paths
+/datasource/target/
+/jdbc-template/target/
+/jpa/target/
