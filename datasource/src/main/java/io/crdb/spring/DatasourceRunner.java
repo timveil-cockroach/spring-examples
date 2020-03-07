@@ -49,7 +49,7 @@ public class DatasourceRunner implements ApplicationRunner {
 
     private void insertUsers() throws SQLException {
 
-        String sql = "INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO datasource_users VALUES (?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -86,7 +86,7 @@ public class DatasourceRunner implements ApplicationRunner {
 
     private void selectUsers() throws SQLException {
 
-        String sql = "SELECT * FROM users WHERE updated_timestamp IS NULL";
+        String sql = "SELECT * FROM datasource_users WHERE updated_timestamp IS NULL";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -125,7 +125,7 @@ public class DatasourceRunner implements ApplicationRunner {
 
     private void updateUsers() throws SQLException {
 
-        String sql = "UPDATE users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
+        String sql = "UPDATE datasource_users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -141,7 +141,7 @@ public class DatasourceRunner implements ApplicationRunner {
 
     private void deleteUsers() throws SQLException {
 
-        String sql = "DELETE FROM users WHERE updated_timestamp IS NOT NULL";
+        String sql = "DELETE FROM datasource_users WHERE updated_timestamp IS NOT NULL";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE IF NOT EXISTS datasource_users
 (
     id                uuid PRIMARY KEY NOT NULL,
     first_name        varchar(50)      NOT NULL,
