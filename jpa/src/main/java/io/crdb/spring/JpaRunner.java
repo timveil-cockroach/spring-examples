@@ -92,7 +92,6 @@ public class JpaRunner implements ApplicationRunner {
                     ZonedDateTime.now(EST),
                     null
             ));
-
         }
         return users;
     }

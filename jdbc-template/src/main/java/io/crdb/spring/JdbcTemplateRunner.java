@@ -123,7 +123,6 @@ public class JdbcTemplateRunner implements ApplicationRunner {
                     ZonedDateTime.now(EST),
                     null
             ));
-
         }
         return users;
     }
