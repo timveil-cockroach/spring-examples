@@ -6,10 +6,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -27,10 +28,12 @@ public class JpaRunner implements ApplicationRunner {
     private int rowSize;
 
     private final UserRepository userRepository;
+    private final TransactionTemplate transactionTemplate;
     private final Faker faker;
 
-    public JpaRunner(UserRepository userRepository, Faker faker) {
+    public JpaRunner(UserRepository userRepository, TransactionTemplate transactionTemplate, Faker faker) {
         this.userRepository = userRepository;
+        this.transactionTemplate = transactionTemplate;
         this.faker = faker;
     }
 
@@ -53,23 +56,25 @@ public class JpaRunner implements ApplicationRunner {
 
 
     private void selectUsers() {
-
+        userRepository.findByUpdatedTimestampIsNull();
     }
 
     private void updateUsers() {
-
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                userRepository.updateTimestamp(ZonedDateTime.now(EST));
+            }
+        });
     }
 
     private void deleteUsers() {
-
-    }
-
-    private ZonedDateTime fromTimestamp(Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-
-        return ZonedDateTime.ofInstant(timestamp.toInstant(), EST);
+        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                userRepository.deleteAll();
+            }
+        });
     }
 
     private List<User> buildUsers() {
