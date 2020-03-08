@@ -18,5 +18,4 @@ public class JdbcTemplateApplication {
 	public Faker faker() {
 		return new Faker(new Locale("en-US"));
 	}
-
 }

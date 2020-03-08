@@ -42,6 +42,23 @@ public class User implements Serializable {
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private ZonedDateTime updatedTimestamp;
 
+    public User() {
+    }
+
+
+    public User(UUID id, String firstName, String lastName, String email, String address, String city, String stateCode, String zipCode, ZonedDateTime createdTimestamp, ZonedDateTime updatedTimestamp) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.address = address;
+        this.city = city;
+        this.stateCode = stateCode;
+        this.zipCode = zipCode;
+        this.createdTimestamp = createdTimestamp;
+        this.updatedTimestamp = updatedTimestamp;
+    }
+
     public UUID getId() {
         return id;
     }
