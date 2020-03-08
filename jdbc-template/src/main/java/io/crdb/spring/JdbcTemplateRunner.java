@@ -101,13 +101,11 @@ public class JdbcTemplateRunner implements ApplicationRunner {
     }
 
     private ZonedDateTime fromTimestamp(Timestamp timestamp) {
-
         if (timestamp == null) {
             return null;
         }
 
         return ZonedDateTime.ofInstant(timestamp.toInstant(), EST);
-
     }
 
     private List<UserDTO> buildUsers() {

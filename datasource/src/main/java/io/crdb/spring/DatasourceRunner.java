@@ -144,13 +144,11 @@ public class DatasourceRunner implements ApplicationRunner {
     }
 
     private ZonedDateTime fromTimestamp(java.sql.Timestamp timestamp) {
-
         if (timestamp == null) {
             return null;
         }
 
         return ZonedDateTime.ofInstant(timestamp.toInstant(), EST);
-
     }
 }
 
