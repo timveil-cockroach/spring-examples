@@ -7,11 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,60 +16,38 @@ import java.util.UUID;
 @Component
 public class JpaRunner implements ApplicationRunner {
 
-    private static final ZoneId EST = ZoneId.of("America/New_York");
     private static final Logger logger = LoggerFactory.getLogger(JpaRunner.class);
 
 
     @Value("${datasource.row.size}")
     private int rowSize;
 
-    private final UserRepository userRepository;
-    private final TransactionTemplate transactionTemplate;
+    private final UserService userService;
     private final Faker faker;
 
-    public JpaRunner(UserRepository userRepository, TransactionTemplate transactionTemplate, Faker faker) {
-        this.userRepository = userRepository;
-        this.transactionTemplate = transactionTemplate;
+    public JpaRunner(UserService userService, Faker faker) {
+        this.userService = userService;
         this.faker = faker;
     }
 
     @Override
     public void run(ApplicationArguments args) {
 
-        insertUsers();
+        userService.insertUsers(buildUsers());
 
-        selectUsers();
 
-        updateUsers();
+        List<User> users = userService.selectUsers();
 
-        deleteUsers();
+        logger.debug("selected {} users", users.size());
 
-    }
 
-    private void insertUsers() {
-        userRepository.saveAll(buildUsers());
-    }
+        int updateUsers = userService.updateUsers();
 
-    private void selectUsers() {
-        userRepository.findByUpdatedTimestampIsNull();
-    }
+        logger.debug("updated {} users", updateUsers);
 
-    private void updateUsers() {
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                userRepository.updateTimestamp(ZonedDateTime.now(EST));
-            }
-        });
-    }
 
-    private void deleteUsers() {
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            @Override
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
-                userRepository.deleteAll();
-            }
-        });
+        userService.deleteUsers();
+
     }
 
     private List<User> buildUsers() {
@@ -88,7 +62,7 @@ public class JpaRunner implements ApplicationRunner {
                     faker.address().city(),
                     faker.address().stateAbbr(),
                     faker.address().zipCode(),
-                    ZonedDateTime.now(EST),
+                    ZonedDateTime.now(),
                     null
             ));
         }

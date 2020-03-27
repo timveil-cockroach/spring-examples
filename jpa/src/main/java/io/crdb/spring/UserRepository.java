@@ -17,5 +17,5 @@ public interface UserRepository extends CrudRepository<User, UUID> {
 
     @Modifying
     @Query("update User u set u.updatedTimestamp = :timestamp where u.updatedTimestamp is null")
-    void updateTimestamp(@Param("timestamp") ZonedDateTime timestamp);
+    int updateTimestamp(@Param("timestamp") ZonedDateTime timestamp);
 }
