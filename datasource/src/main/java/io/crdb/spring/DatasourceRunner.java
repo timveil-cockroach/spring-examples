@@ -8,147 +8,68 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
-import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Component
 public class DatasourceRunner implements ApplicationRunner {
 
-    private static final ZoneId EST = ZoneId.of("America/New_York");
     private static final Logger logger = LoggerFactory.getLogger(DatasourceRunner.class);
-
-    @Value("${datasource.batch.size}")
-    private int batchSize;
 
     @Value("${datasource.row.size}")
     private int rowSize;
 
-    private final DataSource dataSource;
     private final Faker faker;
+    private final UserService userService;
 
-    public DatasourceRunner(DataSource dataSource, Faker faker) {
-        this.dataSource = dataSource;
+    public DatasourceRunner(Faker faker, UserService userService) {
         this.faker = faker;
+        this.userService = userService;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
-        insertUsers();
+        userService.insertUsers(buildUsers());
 
-        selectUsers();
 
-        updateUsers();
+        List<UserDTO> users = userService.selectUsers();
 
-        deleteUsers();
+        logger.debug("selected {} users", users.size());
+
+
+        int updateUsers = userService.updateUsers();
+
+        logger.debug("updated {} users", updateUsers);
+
+
+        int deletedUsers = userService.deleteUsers();
+
+        logger.debug("deleted {} users", deletedUsers);
 
     }
 
-    private void insertUsers() throws SQLException {
-        final String sql = "INSERT INTO datasource_users VALUES (?,?,?,?,?,?,?,?,?,?)";
 
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            int count = 0;
-            for (int i = 0; i < rowSize; i++) {
-
-                ps.setString(1, UUID.randomUUID().toString());
-                ps.setString(2, faker.name().firstName());
-                ps.setString(3, faker.name().lastName());
-                ps.setString(4, faker.internet().safeEmailAddress());
-                ps.setString(5, faker.address().streetAddress());
-                ps.setString(6, faker.address().city());
-                ps.setString(7, faker.address().stateAbbr());
-                ps.setString(8, faker.address().zipCode());
-                ps.setTimestamp(9, Timestamp.from(ZonedDateTime.now(EST).toInstant()));
-                ps.setTimestamp(10, null);
-
-                ps.addBatch();
-
-                if (++count % batchSize == 0) {
-                    int[] batch = ps.executeBatch();
-
-                    logger.debug("inserted {} users", batch.length);
-                }
-
-            }
-
-            int[] remainingBatch = ps.executeBatch();
-
-            logger.debug("inserted remaining {} users", remainingBatch.length);
+    private List<UserDTO> buildUsers() {
+        List<UserDTO> users = new ArrayList<>();
+        for (int i = 0; i < rowSize; i++) {
+            users.add(new UserDTO(
+                    UUID.randomUUID(),
+                    faker.name().firstName(),
+                    faker.name().lastName(),
+                    faker.internet().safeEmailAddress(),
+                    faker.address().streetAddress(),
+                    faker.address().city(),
+                    faker.address().stateAbbr(),
+                    faker.address().zipCode(),
+                    ZonedDateTime.now(),
+                    null
+            ));
         }
-    }
-
-    private void selectUsers() throws SQLException {
-        final String sql = "SELECT * FROM datasource_users WHERE updated_timestamp IS NULL";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            if (rs != null) {
-
-                int count = 0;
-
-                while (rs.next()) {
-
-                    UserDTO user = new UserDTO(
-                            UUID.fromString(rs.getString("id")),
-                            rs.getString("first_name"),
-                            rs.getString("last_name"),
-                            rs.getString("email"),
-                            rs.getString("address"),
-                            rs.getString("city"),
-                            rs.getString("state_code"),
-                            rs.getString("zip_code"),
-                            fromTimestamp(rs.getTimestamp("created_timestamp")),
-                            fromTimestamp(rs.getTimestamp("updated_timestamp"))
-                    );
-
-                    if (++count % 500 == 0) {
-                        logger.debug("sample user [{}]", user.toString());
-                    }
-                }
-            }
-        }
-    }
-
-    private void updateUsers() throws SQLException {
-        final String sql = "UPDATE datasource_users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setTimestamp(1, Timestamp.from(ZonedDateTime.now(EST).toInstant()));
-
-            int usersUpdated = ps.executeUpdate();
-
-            logger.debug("updated {} users", usersUpdated);
-        }
-    }
-
-    private void deleteUsers() throws SQLException {
-        final String sql = "DELETE FROM datasource_users WHERE updated_timestamp IS NOT NULL";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            int usersDeleted = ps.executeUpdate();
-
-            logger.debug("deleted {} users", usersDeleted);
-        }
-    }
-
-    private ZonedDateTime fromTimestamp(java.sql.Timestamp timestamp) {
-        if (timestamp == null) {
-            return null;
-        }
-
-        return ZonedDateTime.ofInstant(timestamp.toInstant(), EST);
+        return users;
     }
 }
 
