@@ -54,7 +54,6 @@ public class JpaRunner implements ApplicationRunner {
         userRepository.saveAll(buildUsers());
     }
 
-
     private void selectUsers() {
         userRepository.findByUpdatedTimestampIsNull();
     }

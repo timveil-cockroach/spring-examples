@@ -10,7 +10,6 @@
         <version>20.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>io.crdb.spring</groupId>
     <artifactId>jpa</artifactId>
 
     <dependencies>
