@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @Component
 public class DatasourceRunner implements ApplicationRunner {
-
     private static final Logger logger = LoggerFactory.getLogger(DatasourceRunner.class);
 
     @Value("${datasource.row.size}")
