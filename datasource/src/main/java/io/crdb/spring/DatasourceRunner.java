@@ -32,22 +32,33 @@ public class DatasourceRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
+        logger.debug("***************************************************** Starting Insert *****************************************************");
+
         userService.insertUsers(buildUsers());
 
+        logger.debug("***************************************************** Starting Select All *****************************************************");
 
         List<UserDTO> users = userService.selectUsers();
 
         logger.debug("selected {} users", users.size());
 
+        logger.debug("***************************************************** Starting Update *****************************************************");
 
         int updateUsers = userService.updateUsers();
 
         logger.debug("updated {} users", updateUsers);
 
+        assert users.size() != updateUsers;
+
+        logger.debug("***************************************************** Starting Delete *****************************************************");
 
         int deletedUsers = userService.deleteUsers();
 
         logger.debug("deleted {} users", deletedUsers);
+
+        assert users.size() != deletedUsers;
+
+        logger.debug("***************************************************** Exiting *****************************************************");
 
     }
 

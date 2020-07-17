@@ -33,21 +33,43 @@ public class JpaRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
-        userService.insertUsers(buildUsers());
+        logger.debug("***************************************************** Starting Insert *****************************************************");
 
+        Iterable<User> newUsers = userService.insertUsers(buildUsers());
+
+        for (User user : newUsers) {
+            logger.trace("created user {}", user.toString());
+        }
+
+        logger.debug("***************************************************** Starting Select All *****************************************************");
 
         List<User> users = userService.selectUsers();
 
         logger.debug("selected {} users", users.size());
 
+        logger.debug("***************************************************** Starting Update *****************************************************");
 
         int updateUsers = userService.updateUsers();
 
         logger.debug("updated {} users", updateUsers);
 
+        assert users.size() != updateUsers;
+
+        logger.debug("***************************************************** Starting Delete *****************************************************");
 
         userService.deleteUsers();
 
+        logger.debug("deleted all users");
+
+        logger.debug("***************************************************** Starting Count *****************************************************");
+
+        long finalCount = userService.countUsers();
+
+        logger.debug("found {} users", finalCount);
+
+        assert finalCount == 0;
+
+        logger.debug("***************************************************** Exiting *****************************************************");
     }
 
     private List<User> buildUsers() {

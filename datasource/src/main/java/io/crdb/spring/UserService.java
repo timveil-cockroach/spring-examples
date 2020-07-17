@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -16,7 +18,7 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(DatasourceRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Value("${datasource.batch.size}")
     private int batchSize;
@@ -27,6 +29,7 @@ public class UserService {
         this.dataSource = dataSource;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void insertUsers(List<UserDTO> users) throws SQLException {
         final String sql = "INSERT INTO datasource_users VALUES (?,?,?,?,?,?,?,?,?,?)";
 
@@ -64,6 +67,7 @@ public class UserService {
         }
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
     public List<UserDTO> selectUsers() throws SQLException {
         List<UserDTO> users = new ArrayList<>();
 
@@ -94,6 +98,7 @@ public class UserService {
         return users;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int updateUsers() throws SQLException {
         final String sql = "UPDATE datasource_users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
 
@@ -106,6 +111,7 @@ public class UserService {
         }
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int deleteUsers() throws SQLException {
         final String sql = "DELETE FROM datasource_users WHERE updated_timestamp IS NOT NULL";
 

@@ -1,8 +1,9 @@
 package io.crdb.spring;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -15,20 +16,27 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void insertUsers(List<User> users) {
-        userRepository.saveAll(users);
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Iterable<User> insertUsers(List<User> users) {
+        return userRepository.saveAll(users);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
     public List<User> selectUsers() {
         return userRepository.findByUpdatedTimestampIsNull();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    public long countUsers() {
+        return userRepository.count();
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int updateUsers() {
         return userRepository.updateTimestamp(ZonedDateTime.now());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteUsers() {
         userRepository.deleteAll();
     }

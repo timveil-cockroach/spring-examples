@@ -3,6 +3,8 @@ package io.crdb.spring;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.ZoneId;
@@ -22,6 +24,7 @@ public class UserService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void insertUsers(List<UserDTO> users) {
         final String sql = "INSERT INTO jdbc_template_users VALUES (?,?,?,?,?,?,?,?,?,?)";
 
@@ -44,6 +47,7 @@ public class UserService {
     }
 
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
     public List<UserDTO> selectUsers() {
         final String sql = "SELECT * FROM jdbc_template_users WHERE updated_timestamp IS NULL";
 
@@ -61,12 +65,14 @@ public class UserService {
         ));
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int updateUsers() {
         final String sql = "UPDATE jdbc_template_users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
 
         return jdbcTemplate.update(sql, Timestamp.from(ZonedDateTime.now().toInstant()));
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public int deleteUsers() {
         final String sql = "DELETE FROM jdbc_template_users WHERE updated_timestamp IS NOT NULL";
 
@@ -80,5 +86,4 @@ public class UserService {
 
         return ZonedDateTime.ofInstant(timestamp.toInstant(), ZoneId.systemDefault());
     }
-
 }
