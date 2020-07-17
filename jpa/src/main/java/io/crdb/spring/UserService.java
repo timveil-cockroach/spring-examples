@@ -1,5 +1,7 @@
 package io.crdb.spring;
 
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,14 +13,16 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RetryTemplate retryTemplate;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, RetryTemplate retryTemplate) {
         this.userRepository = userRepository;
+        this.retryTemplate = retryTemplate;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Iterable<User> insertUsers(List<User> users) {
-        return userRepository.saveAll(users);
+        return retryTemplate.execute(context -> userRepository.saveAll(users));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
@@ -33,12 +37,15 @@ public class UserService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public int updateUsers() {
-        return userRepository.updateTimestamp(ZonedDateTime.now());
+        return retryTemplate.execute(context -> userRepository.updateTimestamp(ZonedDateTime.now()));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteUsers() {
-        userRepository.deleteAll();
+        retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
+            userRepository.deleteAll();
+            return null;
+        });
     }
 
 }
