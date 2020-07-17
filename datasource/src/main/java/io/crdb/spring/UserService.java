@@ -1,5 +1,6 @@
 package io.crdb.spring;
 
+import io.crdb.spring.common.UserDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package io.crdb.spring;
+package io.crdb.spring.common;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;

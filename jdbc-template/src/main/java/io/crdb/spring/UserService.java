@@ -1,5 +1,6 @@
 package io.crdb.spring;
 
+import io.crdb.spring.common.UserDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
