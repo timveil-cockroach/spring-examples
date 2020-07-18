@@ -45,7 +45,6 @@ public class User implements Serializable {
     public User() {
     }
 
-
     public User(UUID id, String firstName, String lastName, String email, String address, String city, String stateCode, String zipCode, ZonedDateTime createdTimestamp, ZonedDateTime updatedTimestamp) {
         this.id = id;
         this.firstName = firstName;

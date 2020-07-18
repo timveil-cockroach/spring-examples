@@ -1,7 +1,7 @@
 package io.crdb.spring;
 
-import io.crdb.spring.common.UserBuilder;
 import io.crdb.spring.common.UserDTO;
+import io.crdb.spring.common.UserDTOBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -14,11 +14,11 @@ import java.util.List;
 public class JdbcTemplateRunner implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(JdbcTemplateRunner.class);
 
-    private final UserBuilder userBuilder;
+    private final UserDTOBuilder userDTOBuilder;
     private final UserService userService;
 
-    public JdbcTemplateRunner(UserBuilder userBuilder, UserService userService) {
-        this.userBuilder = userBuilder;
+    public JdbcTemplateRunner(UserDTOBuilder userDTOBuilder, UserService userService) {
+        this.userDTOBuilder = userDTOBuilder;
         this.userService = userService;
     }
 
@@ -27,7 +27,7 @@ public class JdbcTemplateRunner implements ApplicationRunner {
 
         logger.debug("***************************************************** Starting Insert *****************************************************");
 
-        userService.insertUsers(userBuilder.buildUsers());
+        userService.insertUsers(userDTOBuilder.buildUsers());
 
         logger.debug("***************************************************** Starting Select All *****************************************************");
 
