@@ -24,20 +24,23 @@ public class UserBuilder {
     public List<User> buildUsers() {
         List<User> users = new ArrayList<>();
         for (int i = 0; i < rowSize; i++) {
-            users.add(new User(
-                            UUID.randomUUID(),
-                            faker.name().firstName(),
-                            faker.name().lastName(),
-                            faker.internet().safeEmailAddress(),
-                            faker.address().streetAddress(),
-                            faker.address().city(),
-                            faker.address().stateAbbr(),
-                            faker.address().zipCode(),
-                            ZonedDateTime.now(),
-                            null
-                    )
-            );
+            users.add(buildUser());
         }
         return users;
+    }
+
+    public User buildUser() {
+        return new User(
+                UUID.randomUUID(),
+                faker.name().firstName(),
+                faker.name().lastName(),
+                faker.internet().safeEmailAddress(),
+                faker.address().streetAddress(),
+                faker.address().city(),
+                faker.address().stateAbbr(),
+                faker.address().zipCode(),
+                ZonedDateTime.now(),
+                null
+        );
     }
 }
