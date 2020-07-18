@@ -4,6 +4,7 @@ import io.crdb.spring.common.UserDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +26,11 @@ public class UserService {
     private int batchSize;
 
     private final DataSource dataSource;
+    private final RetryTemplate retryTemplate;
 
-    public UserService(DataSource dataSource) {
+    public UserService(DataSource dataSource, RetryTemplate retryTemplate) {
         this.dataSource = dataSource;
+        this.retryTemplate = retryTemplate;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -55,14 +58,14 @@ public class UserService {
                 ps.addBatch();
 
                 if (++count % batchSize == 0) {
-                    int[] batch = ps.executeBatch();
+                    int[] batch = retryTemplate.execute(context -> ps.executeBatch());
 
                     logger.debug("inserted {} users", batch.length);
                 }
 
             }
 
-            int[] remainingBatch = ps.executeBatch();
+            int[] remainingBatch = retryTemplate.execute(context -> ps.executeBatch());
 
             logger.debug("inserted remaining {} users", remainingBatch.length);
         }
@@ -108,7 +111,7 @@ public class UserService {
 
             ps.setTimestamp(1, Timestamp.from(ZonedDateTime.now().toInstant()));
 
-            return ps.executeUpdate();
+            return retryTemplate.execute(context -> ps.executeUpdate());
         }
     }
 
@@ -119,7 +122,7 @@ public class UserService {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            return ps.executeUpdate();
+            return retryTemplate.execute(context -> ps.executeUpdate());
         }
     }
 
