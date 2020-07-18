@@ -31,7 +31,7 @@ public class JdbcTemplateApplication {
 
 		return RetryTemplate.builder()
 				.customPolicy(policy)
-				.fixedBackoff(100)
+				.fixedBackoff(2)
 				.build();
 	}
 }
