@@ -72,21 +72,21 @@ class UserServiceTest {
     void saveAll() {
         logger.debug("*********************************** starting saveAll ***********************************");
         userService.saveAll(userList);
-        logger.debug("*********************************** starting saveAll ***********************************");
+        logger.debug("*********************************** finished saveAll ***********************************");
     }
 
     @Test
     void testSaveAll() {
         logger.debug("*********************************** starting testSaveAll ***********************************");
         userService.saveAll(userIterable);
-        logger.debug("*********************************** starting testSaveAll ***********************************");
+        logger.debug("*********************************** finished testSaveAll ***********************************");
     }
 
     @Test
     void save() {
         logger.debug("*********************************** starting save ***********************************");
         userService.save(user);
-        logger.debug("*********************************** starting save ***********************************");
+        logger.debug("*********************************** finished save ***********************************");
     }
 
     @Test
@@ -95,7 +95,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting findAll ***********************************");
         userService.findAll();
-        logger.debug("*********************************** starting findAll ***********************************");
+        logger.debug("*********************************** finished findAll ***********************************");
     }
 
     @Test
@@ -104,7 +104,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting testFindAll ***********************************");
         userService.findAll(uuidIterable);
-        logger.debug("*********************************** starting testFindAll ***********************************");
+        logger.debug("*********************************** finished testFindAll ***********************************");
     }
 
     @Test
@@ -113,7 +113,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting find ***********************************");
         userService.find(user.getId());
-        logger.debug("*********************************** starting find ***********************************");
+        logger.debug("*********************************** finished find ***********************************");
     }
 
     @Test
@@ -122,7 +122,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting exists ***********************************");
         userService.exists(user.getId());
-        logger.debug("*********************************** starting exists ***********************************");
+        logger.debug("*********************************** finished exists ***********************************");
     }
 
     @Test
@@ -131,7 +131,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting count ***********************************");
         userService.count();
-        logger.debug("*********************************** starting count ***********************************");
+        logger.debug("*********************************** finished count ***********************************");
     }
 
     @Test
@@ -140,7 +140,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting deleteAll ***********************************");
         userService.deleteAll();
-        logger.debug("*********************************** end deleteAll ***********************************");
+        logger.debug("*********************************** finished deleteAll ***********************************");
     }
 
     @Test
@@ -149,7 +149,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting testDeleteAll ***********************************");
         userService.deleteAll(userIterable);
-        logger.debug("*********************************** end testDeleteAll ***********************************");
+        logger.debug("*********************************** finished testDeleteAll ***********************************");
     }
 
     @Test
@@ -158,7 +158,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting delete ***********************************");
         userService.delete(user.getId());
-        logger.debug("*********************************** end delete ***********************************");
+        logger.debug("*********************************** finished delete ***********************************");
     }
 
     @Test
@@ -167,7 +167,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting testDelete ***********************************");
         userService.delete(user);
-        logger.debug("*********************************** end testDelete ***********************************");
+        logger.debug("*********************************** finished testDelete ***********************************");
     }
 
     @Test
@@ -176,7 +176,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting updateUsers ***********************************");
         userService.updateUsers();
-        logger.debug("*********************************** starting updateUsers ***********************************");
+        logger.debug("*********************************** finished updateUsers ***********************************");
     }
 
     @Test
@@ -185,6 +185,6 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting findUsersWithNullTimestamp ***********************************");
         userService.findUsersWithNullTimestamp();
-        logger.debug("*********************************** starting findUsersWithNullTimestamp ***********************************");
+        logger.debug("*********************************** finished findUsersWithNullTimestamp ***********************************");
     }
 }
