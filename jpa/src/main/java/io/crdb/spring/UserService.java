@@ -56,7 +56,6 @@ public class UserService {
         return userRepository.existsById(id);
     }
 
-
     @Transactional(readOnly = true)
     public long count() {
         return userRepository.count();
