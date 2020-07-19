@@ -52,23 +52,17 @@ public class JpaBatchRunner implements ApplicationRunner, Ordered {
 
         logger.debug("***************************************************** Starting Update Users *****************************************************");
 
-        int updatedUsers = userService.updateUsers();
-
-        assert foundUsersSize == updatedUsers;
-
-        logger.debug("***************************************************** Starting Update Users 2 *****************************************************");
-
         for (User user : foundUsers) {
             user.setUpdatedTimestamp(ZonedDateTime.now());
         }
 
-        Iterable<User> updatedUsers2 = userService.saveAll(foundUsers);
+        Iterable<User> updatedUsers = userService.saveAll(foundUsers);
 
-        assert updatedUsers == Iterables.size(updatedUsers2);
+        assert foundUsersSize == Iterables.size(updatedUsers);
 
         logger.debug("***************************************************** Starting Delete Users *****************************************************");
 
-        userService.deleteAll();
+        userService.deleteAll(updatedUsers);
 
         logger.debug("***************************************************** Starting Count Users *****************************************************");
 
