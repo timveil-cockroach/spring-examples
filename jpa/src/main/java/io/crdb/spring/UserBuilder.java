@@ -22,8 +22,12 @@ public class UserBuilder {
     }
 
     public List<User> buildUsers() {
+        return buildUsers(rowSize);
+    }
+
+    public List<User> buildUsers(int num) {
         List<User> users = new ArrayList<>();
-        for (int i = 0; i < rowSize; i++) {
+        for (int i = 0; i < num; i++) {
             users.add(buildUser());
         }
         return users;
