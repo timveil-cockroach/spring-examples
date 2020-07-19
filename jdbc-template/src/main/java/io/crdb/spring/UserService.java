@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -28,7 +27,7 @@ public class UserService {
         this.retryTemplate = retryTemplate;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void insertUsers(List<UserDTO> users) {
         final String sql = "INSERT INTO jdbc_template_users VALUES (?,?,?,?,?,?,?,?,?,?)";
 
@@ -54,7 +53,7 @@ public class UserService {
     }
 
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public List<UserDTO> selectUsers() {
         final String sql = "SELECT * FROM jdbc_template_users WHERE updated_timestamp IS NULL";
 
@@ -74,14 +73,14 @@ public class UserService {
         );
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public int updateUsers() {
         final String sql = "UPDATE jdbc_template_users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
 
         return retryTemplate.execute(context -> jdbcTemplate.update(sql, Timestamp.from(ZonedDateTime.now().toInstant())));
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public int deleteUsers() {
         final String sql = "DELETE FROM jdbc_template_users WHERE updated_timestamp IS NOT NULL";
 

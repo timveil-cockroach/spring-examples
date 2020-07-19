@@ -3,7 +3,6 @@ package io.crdb.spring;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
@@ -22,48 +21,48 @@ public class UserService {
         this.retryTemplate = retryTemplate;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public Iterable<User> saveAll(List<User> users) {
         return retryTemplate.execute(context -> userRepository.saveAll(users));
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public Iterable<User> saveAll(Iterable<User> users) {
         return retryTemplate.execute(context -> userRepository.saveAll(users));
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public User save(User user) {
         return retryTemplate.execute(context -> userRepository.save(user));
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public Iterable<User> findAll() {
         return userRepository.findAll();
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public Iterable<User> findAll(Iterable<UUID> ids) {
         return userRepository.findAllById(ids);
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public Optional<User> find(UUID id) {
         return userRepository.findById(id);
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public boolean exists(UUID id) {
         return userRepository.existsById(id);
     }
 
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public long count() {
         return userRepository.count();
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void deleteAll() {
         retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
             userRepository.deleteAll();
@@ -71,7 +70,7 @@ public class UserService {
         });
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void deleteAll(Iterable<User> users) {
         retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
             userRepository.deleteAll(users);
@@ -79,7 +78,7 @@ public class UserService {
         });
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void delete(UUID id) {
         retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
             userRepository.deleteById(id);
@@ -87,7 +86,7 @@ public class UserService {
         });
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void delete(User user) {
         retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
             userRepository.delete(user);
@@ -97,13 +96,13 @@ public class UserService {
 
     // custom methods
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public int updateUsers() {
         return retryTemplate.execute(context -> userRepository.updateTimestamp(ZonedDateTime.now()));
     }
 
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public Iterable<User> findUsersWithNullTimestamp() {
         return userRepository.findByUpdatedTimestampIsNull();
     }

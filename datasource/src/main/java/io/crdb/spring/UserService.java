@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -33,7 +32,7 @@ public class UserService {
         this.retryTemplate = retryTemplate;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public void insertUsers(List<UserDTO> users) throws SQLException {
         final String sql = "INSERT INTO datasource_users VALUES (?,?,?,?,?,?,?,?,?,?)";
 
@@ -71,7 +70,7 @@ public class UserService {
         }
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     public List<UserDTO> selectUsers() throws SQLException {
         List<UserDTO> users = new ArrayList<>();
 
@@ -102,7 +101,7 @@ public class UserService {
         return users;
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public int updateUsers() throws SQLException {
         final String sql = "UPDATE datasource_users SET updated_timestamp = ? WHERE updated_timestamp IS NULL";
 
@@ -115,7 +114,7 @@ public class UserService {
         }
     }
 
-    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Transactional
     public int deleteUsers() throws SQLException {
         final String sql = "DELETE FROM datasource_users WHERE updated_timestamp IS NOT NULL";
 
