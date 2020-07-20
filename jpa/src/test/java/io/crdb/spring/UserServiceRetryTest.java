@@ -83,6 +83,7 @@ public class UserServiceRetryTest {
         };
         */
 
+        // simulates a long running update transaction.  this transaction opens before `update` thread and closes after `update` thread commits
         Runnable block = () -> {
             logger.debug("*********************************** starting blocking ***********************************");
 
@@ -97,6 +98,7 @@ public class UserServiceRetryTest {
             }
         };
 
+        // is an acutal update that supports retry logic
         Runnable update = () -> {
 
             try {
