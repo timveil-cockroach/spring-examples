@@ -91,7 +91,7 @@ public class UserServiceRetryTest {
                 user.setUpdatedTimestamp(ZonedDateTime.now());
                 userService.forceRetry(user, 1, 5);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.warn(e.getMessage(), e);
             } finally {
                 countDownLatch.countDown();
                 logger.debug("*********************************** finished blocking ***********************************");
@@ -104,7 +104,7 @@ public class UserServiceRetryTest {
             try {
                 TimeUnit.SECONDS.sleep(3);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.warn(e.getMessage(), e);
             }
 
             logger.debug("*********************************** starting retryable ***********************************");
