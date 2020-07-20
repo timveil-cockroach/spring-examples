@@ -5,14 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Savepoint;
 import java.time.ZonedDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -49,6 +44,7 @@ public class UserServiceRetryTest {
 
         CountDownLatch countDownLatch = new CountDownLatch(2);
 
+        /*
         Runnable select = () -> {
 
             logger.debug("*********************************** starting blocking update ***********************************");
@@ -85,6 +81,7 @@ public class UserServiceRetryTest {
                 logger.debug("*********************************** finished blocking update ***********************************");
             }
         };
+        */
 
         Runnable block = () -> {
             logger.debug("*********************************** starting blocking ***********************************");
