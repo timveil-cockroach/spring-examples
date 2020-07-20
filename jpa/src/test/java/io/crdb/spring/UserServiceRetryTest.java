@@ -34,9 +34,7 @@ public class UserServiceRetryTest {
     @Test
     void retry() {
 
-        User user = userBuilder.buildUser();
-
-        userService.save(user);
+        User savedUser = userService.save(userBuilder.buildUser());
 
         logger.debug("*********************************** save complete -- starting threads ***********************************");
 
@@ -88,8 +86,8 @@ public class UserServiceRetryTest {
             logger.debug("*********************************** starting blocking ***********************************");
 
             try {
-                user.setUpdatedTimestamp(ZonedDateTime.now());
-                userService.forceRetry(user, 1, 5);
+                savedUser.setUpdatedTimestamp(ZonedDateTime.now());
+                userService.forceRetry(savedUser, 1, 5);
             } catch (InterruptedException e) {
                 logger.warn(e.getMessage(), e);
             } finally {
@@ -110,8 +108,8 @@ public class UserServiceRetryTest {
             logger.debug("*********************************** starting retryable ***********************************");
 
             try {
-                user.setUpdatedTimestamp(ZonedDateTime.now());
-                userService.save(user);
+                savedUser.setUpdatedTimestamp(ZonedDateTime.now());
+                userService.save(savedUser);
             } finally {
                 countDownLatch.countDown();
                 logger.debug("*********************************** finished retryable ***********************************");
