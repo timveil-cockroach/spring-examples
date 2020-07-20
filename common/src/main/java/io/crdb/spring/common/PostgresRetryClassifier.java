@@ -41,6 +41,8 @@ public class PostgresRetryClassifier implements Classifier<Throwable, RetryPolic
             // ------------------
 
             return errorCode == 0 && POSTGRES_SERIALIZATION_FAILURE.equals(sqlState);
+        } else {
+            logger.debug("retry exception: {}", ex.getMessage());
         }
 
         return false;

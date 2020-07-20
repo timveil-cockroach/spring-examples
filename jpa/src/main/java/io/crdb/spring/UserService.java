@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
@@ -92,6 +93,16 @@ public class UserService {
             return null;
         });
     }
+
+    // force retry methods
+
+    @Transactional
+    public void forceRetry(User user, int waitBefore, int waitAfter) throws InterruptedException {
+        TimeUnit.SECONDS.sleep(waitBefore);
+        userRepository.save(user);
+        TimeUnit.SECONDS.sleep(waitAfter);
+    }
+
 
     // custom methods
 
