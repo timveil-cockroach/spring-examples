@@ -42,45 +42,6 @@ public class UserServiceRetryTest {
 
         CountDownLatch countDownLatch = new CountDownLatch(2);
 
-        /*
-        Runnable select = () -> {
-
-            logger.debug("*********************************** starting blocking update ***********************************");
-
-            try (Connection connection = DataSourceUtils.getConnection(dataSource)) {
-
-                connection.setAutoCommit(false);
-
-                Savepoint savepoint = connection.setSavepoint("holding select");
-
-                try (PreparedStatement preparedStatement = connection.prepareStatement("UPDATE jpa_users SET updated_timestamp = now() WHERE id = ?")) {
-
-                    preparedStatement.setObject(1, user.getId());
-
-                    TimeUnit.SECONDS.sleep(3);
-
-                    preparedStatement.executeUpdate();
-
-                    TimeUnit.SECONDS.sleep(2);
-
-                    connection.releaseSavepoint(savepoint);
-                    connection.commit();
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                connection.setAutoCommit(true);
-
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            } finally {
-                countDownLatch.countDown();
-                logger.debug("*********************************** finished blocking update ***********************************");
-            }
-        };
-        */
-
         // simulates a long running update transaction.  this transaction opens before `update` thread and closes after `update` thread commits
         Runnable block = () -> {
             logger.debug("*********************************** starting blocking ***********************************");
