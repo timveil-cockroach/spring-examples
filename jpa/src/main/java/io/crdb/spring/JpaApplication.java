@@ -27,6 +27,7 @@ public class JpaApplication {
 		return new Faker(Locale.US);
 	}
 
+	// not used by @Transactional.  To use it must be called directly
 	@Bean
 	public RetryTemplate retryTemplate(ExceptionChecker exceptionChecker) {
 		ExceptionClassifierRetryPolicy policy = new ExceptionClassifierRetryPolicy();
