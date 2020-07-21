@@ -23,7 +23,7 @@ spring.jpa.properties.hibernate.order_updates=true
 With CRDB and Java it is always good practice to set the batch size to a factor of `128`.  See https://www.cockroachlabs.com/docs/stable/build-a-java-app-with-cockroachdb.html#use-a-batch-size-of-128.
 
 ### Use `reWriteBatchedInserts=true`
-When specifying the `spring.datasource.url` be sure to set the following parameter:  `reWriteBatchedInserts=true`.  This can significantly increase performance by co lapsing multiple insert statements into a single, multi-row statement thus reducing statement overhead. See https://www.cockroachlabs.com/docs/stable/build-a-java-app-with-cockroachdb-hibernate.html#use-rewritebatchedinserts-for-increased-speed.
+When specifying the `spring.datasource.url` be sure to set the following parameter:  `reWriteBatchedInserts=true`.  This can significantly increase performance by collapsing multiple insert statements into a single, multi-row statement thus reducing statement overhead. See https://www.cockroachlabs.com/docs/stable/build-a-java-app-with-cockroachdb-hibernate.html#use-rewritebatchedinserts-for-increased-speed.
 
 ### Transactions and Retry
 CRDB encourages the use of retry logic for database write operations (see https://www.cockroachlabs.com/docs/stable/transactions.html#transaction-retries).  The Spring Retry project makes implementing retry logic simple via two styles... declarative (annotation driven) or imperative (template driven).  Before implementing retry logic it is critically important to understand your specific implementation of transactions and how you want them to be retried.  Like many things, the options are endless.
