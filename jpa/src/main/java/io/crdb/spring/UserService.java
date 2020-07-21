@@ -1,40 +1,20 @@
 package io.crdb.spring;
 
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.support.RetryTemplate;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RetryTemplate retryTemplate;
 
-    public UserService(UserRepository userRepository, RetryTemplate retryTemplate) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.retryTemplate = retryTemplate;
-    }
-
-    @Transactional
-    public Iterable<User> saveAll(List<User> users) {
-        return retryTemplate.execute(context -> userRepository.saveAll(users));
-    }
-
-    @Transactional
-    public Iterable<User> saveAll(Iterable<User> users) {
-        return retryTemplate.execute(context -> userRepository.saveAll(users));
-    }
-
-    @Transactional
-    public User save(User user) {
-        return retryTemplate.execute(context -> userRepository.save(user));
     }
 
     @Transactional(readOnly = true)
@@ -63,58 +43,45 @@ public class UserService {
     }
 
     @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
+    public Iterable<User> saveAll(List<User> users) {
+        return userRepository.saveAll(users);
+    }
+
+    @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
+    public Iterable<User> saveAll(Iterable<User> users) {
+        return userRepository.saveAll(users);
+    }
+
+    @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
     public void deleteAll() {
-        retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
-            userRepository.deleteAll();
-            return null;
-        });
+        userRepository.deleteAll();
     }
 
     @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
     public void deleteAll(Iterable<User> users) {
-        retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
-            userRepository.deleteAll(users);
-            return null;
-        });
+        userRepository.deleteAll(users);
     }
 
     @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
     public void delete(UUID id) {
-        retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
-            userRepository.deleteById(id);
-            return null;
-        });
+        userRepository.deleteById(id);
     }
 
     @Transactional
+    @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
     public void delete(User user) {
-        retryTemplate.execute((RetryCallback<Void, RuntimeException>) context -> {
-            userRepository.delete(user);
-            return null;
-        });
-    }
-
-    // force retry methods
-
-    @Transactional
-    public void forceRetry(User user, int waitBefore, int waitAfter) throws InterruptedException {
-        TimeUnit.SECONDS.sleep(waitBefore);
-        userRepository.save(user);
-        TimeUnit.SECONDS.sleep(waitAfter);
-    }
-
-
-    // custom methods
-
-    @Transactional
-    public int updateUsers() {
-        return retryTemplate.execute(context -> userRepository.updateTimestamp(ZonedDateTime.now()));
-    }
-
-
-    @Transactional(readOnly = true)
-    public Iterable<User> findUsersWithNullTimestamp() {
-        return userRepository.findByUpdatedTimestampIsNull();
+        userRepository.delete(user);
     }
 
 }

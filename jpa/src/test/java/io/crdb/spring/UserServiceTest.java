@@ -169,22 +169,4 @@ class UserServiceTest {
         userService.delete(user);
         logger.debug("*********************************** finished testDelete ***********************************");
     }
-
-    @Test
-    void updateUsers() {
-        userService.saveAll(userIterable);
-
-        logger.debug("*********************************** starting updateUsers ***********************************");
-        userService.updateUsers();
-        logger.debug("*********************************** finished updateUsers ***********************************");
-    }
-
-    @Test
-    void findUsersWithNullTimestamp() {
-        userService.saveAll(userIterable);
-
-        logger.debug("*********************************** starting findUsersWithNullTimestamp ***********************************");
-        userService.findUsersWithNullTimestamp();
-        logger.debug("*********************************** finished findUsersWithNullTimestamp ***********************************");
-    }
 }

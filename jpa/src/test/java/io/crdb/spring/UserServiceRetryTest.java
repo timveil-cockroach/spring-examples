@@ -1,5 +1,7 @@
 package io.crdb.spring;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,12 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.sql.DataSource;
 import java.time.ZonedDateTime;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -22,13 +20,16 @@ public class UserServiceRetryTest {
 
     private final UserService userService;
     private final UserBuilder userBuilder;
-    private final DataSource dataSource;
 
     @Autowired
-    public UserServiceRetryTest(UserService userService, UserBuilder userBuilder, DataSource dataSource) {
+    public UserServiceRetryTest(UserService userService, UserBuilder userBuilder) {
         this.userService = userService;
         this.userBuilder = userBuilder;
-        this.dataSource = dataSource;
+    }
+
+    @BeforeEach
+    void setUp() {
+        userService.deleteAll();
     }
 
     @Test
@@ -36,49 +37,26 @@ public class UserServiceRetryTest {
 
         User savedUser = userService.save(userBuilder.buildUser());
 
-        logger.debug("*********************************** save complete -- starting threads ***********************************");
+        final int threads = Runtime.getRuntime().availableProcessors();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        logger.debug("*********************************** save complete -- starting {} threads ***********************************", threads);
 
-        CountDownLatch countDownLatch = new CountDownLatch(2);
+        ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("user-update-thread-%d").build();
+        ExecutorService executorService = Executors.newFixedThreadPool(threads, namedThreadFactory);
 
-        // simulates a long running update transaction.  this transaction opens before `update` thread and closes after `update` thread commits
-        Runnable block = () -> {
-            logger.debug("*********************************** starting blocking ***********************************");
+        CountDownLatch countDownLatch = new CountDownLatch(threads);
 
-            try {
-                savedUser.setUpdatedTimestamp(ZonedDateTime.now());
-                userService.forceRetry(savedUser, 1, 5);
-            } catch (InterruptedException e) {
-                logger.warn(e.getMessage(), e);
-            } finally {
-                countDownLatch.countDown();
-                logger.debug("*********************************** finished blocking ***********************************");
-            }
-        };
-
-        // is an acutal update that supports retry logic
-        Runnable update = () -> {
-
-            try {
-                TimeUnit.SECONDS.sleep(3);
-            } catch (InterruptedException e) {
-                logger.warn(e.getMessage(), e);
-            }
-
-            logger.debug("*********************************** starting retryable ***********************************");
-
-            try {
-                savedUser.setUpdatedTimestamp(ZonedDateTime.now());
-                userService.save(savedUser);
-            } finally {
-                countDownLatch.countDown();
-                logger.debug("*********************************** finished retryable ***********************************");
-            }
-        };
-
-        executorService.submit(block);
-        executorService.submit(update);
+        for (int i = 0; i < threads; i++) {
+            executorService.submit(() -> {
+                        try {
+                            savedUser.setUpdatedTimestamp(ZonedDateTime.now());
+                            userService.save(savedUser);
+                        } finally {
+                            countDownLatch.countDown();
+                        }
+                    }
+            );
+        }
 
         try {
             boolean cleanExit = countDownLatch.await(30, TimeUnit.SECONDS);
@@ -93,6 +71,7 @@ public class UserServiceRetryTest {
         executorService.shutdown();
 
         logger.debug("*********************************** shutdown complete ***********************************");
+
 
     }
 }
