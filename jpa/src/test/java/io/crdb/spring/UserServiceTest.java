@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @SpringBootTest
@@ -71,21 +72,21 @@ class UserServiceTest {
     @Test
     void saveAll() {
         logger.debug("*********************************** starting saveAll ***********************************");
-        userService.saveAll(userList);
+        Iterable<User> users = userService.saveAll(userList);
         logger.debug("*********************************** finished saveAll ***********************************");
     }
 
     @Test
     void testSaveAll() {
         logger.debug("*********************************** starting testSaveAll ***********************************");
-        userService.saveAll(userIterable);
+        Iterable<User> users = userService.saveAll(userIterable);
         logger.debug("*********************************** finished testSaveAll ***********************************");
     }
 
     @Test
     void save() {
         logger.debug("*********************************** starting save ***********************************");
-        userService.save(user);
+        User save = userService.save(user);
         logger.debug("*********************************** finished save ***********************************");
     }
 
@@ -94,7 +95,7 @@ class UserServiceTest {
         userService.saveAll(userIterable);
 
         logger.debug("*********************************** starting findAll ***********************************");
-        userService.findAll();
+        Iterable<User> all = userService.findAll();
         logger.debug("*********************************** finished findAll ***********************************");
     }
 
@@ -103,7 +104,7 @@ class UserServiceTest {
         userService.saveAll(userIterable);
 
         logger.debug("*********************************** starting testFindAll ***********************************");
-        userService.findAll(uuidIterable);
+        Iterable<User> all = userService.findAll(uuidIterable);
         logger.debug("*********************************** finished testFindAll ***********************************");
     }
 
@@ -112,7 +113,7 @@ class UserServiceTest {
         userService.saveAll(userIterable);
 
         logger.debug("*********************************** starting find ***********************************");
-        userService.find(user.getId());
+        Optional<User> user = userService.find(this.user.getId());
         logger.debug("*********************************** finished find ***********************************");
     }
 
@@ -121,7 +122,7 @@ class UserServiceTest {
         userService.saveAll(userIterable);
 
         logger.debug("*********************************** starting exists ***********************************");
-        userService.exists(user.getId());
+        boolean exists = userService.exists(user.getId());
         logger.debug("*********************************** finished exists ***********************************");
     }
 
@@ -130,7 +131,7 @@ class UserServiceTest {
         userService.saveAll(userIterable);
 
         logger.debug("*********************************** starting count ***********************************");
-        userService.count();
+        long count = userService.count();
         logger.debug("*********************************** finished count ***********************************");
     }
 
