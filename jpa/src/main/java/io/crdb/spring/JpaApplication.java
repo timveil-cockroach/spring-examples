@@ -27,7 +27,15 @@ public class JpaApplication {
 		return new Faker(Locale.US);
 	}
 
-	// not used by @Transactional.  To use it must be called directly
+	/**
+	 * Configure the RetryTemplate to use custom ExceptionClassifierRetryPolicy for determining
+	 * if exceptions are retryable.  {@link PostgresRetryClassifier} uses {@link ExceptionChecker} to
+	 * inspect Exceptions.  The RetryTemplate is not used by the
+	 * {@link org.springframework.retry.annotation.Retryable} annotation.
+	 *
+	 * @param exceptionChecker utility for checking if exception is "retryable"
+	 * @return RetryTemplate
+	 */
 	@Bean
 	public RetryTemplate retryTemplate(ExceptionChecker exceptionChecker) {
 		ExceptionClassifierRetryPolicy policy = new ExceptionClassifierRetryPolicy();
