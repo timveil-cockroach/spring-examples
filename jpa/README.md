@@ -31,12 +31,22 @@ CRDB encourages the use of retry logic for database write operations (see https:
 * __Match styles and scope...__ if you are using declarative transaction management on a given method, use declarative retry logic at the method level too.  It can be confusing to match class and method level scoping.  Furthermore, mixing declarative and imperative styles is not only difficult to read but will likely lead to undesirable behavior.  For example, the `userRepository` call in this method will never be retried even tough it compiles and "looks" valid.
 
     ```java
+    // Wrong :(
     @Transactional
     public User save(User user) {
         return retryTemplate.execute(context -> userRepository.save(user));
     }
     ``` 
-  Retry logic is not called here because the declarative `@Transactional` annotation effectively wraps the method body in `BEGIN` and `COMMIT` statements.  Should a "retryable" exception be encountered it would likely happen during the `COMMIT` phase which is outside the scope of the method body that contains the imperative retry logic.  In other words, the code that encounters the "retryable" exception is not wrapped by the `retryTemplate`... whoops!
+  Retry logic is not called here because the declarative `@Transactional` annotation effectively wraps the method body in `BEGIN` and `COMMIT` statements.  Should a "retryable" exception be encountered it would likely happen during the `COMMIT` phase which is outside the scope of the method body that contains the imperative retry logic.  In other words, the code that encounters the "retryable" exception is not wrapped by the `retryTemplate`... whoops!  The following implementation behaves correctly:
+  
+  ```java
+  // Right :)
+  @Transactional
+  @Retryable(exceptionExpression="@exceptionChecker.shouldRetry(#root)")
+  public User save(User user) {
+      return userRepository.save(user);
+  }
+  ```
    
 
 
