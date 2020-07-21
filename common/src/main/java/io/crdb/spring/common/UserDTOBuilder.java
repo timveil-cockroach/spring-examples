@@ -22,8 +22,12 @@ public class UserDTOBuilder {
     }
 
     public List<UserDTO> buildUsers() {
+        return buildUsers(rowSize);
+    }
+
+    public List<UserDTO> buildUsers(int num) {
         List<UserDTO> users = new ArrayList<>();
-        for (int i = 0; i < rowSize; i++) {
+        for (int i = 0; i < num; i++) {
             users.add(buildUser());
         }
         return users;
