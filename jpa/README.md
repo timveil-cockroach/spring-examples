@@ -37,7 +37,7 @@ CRDB encourages the use of retry logic for database write operations (see https:
         return retryTemplate.execute(context -> userRepository.save(user));
     }
     ``` 
-  Retry logic is not called here because the declarative `@Transactional` annotation effectively wraps the method body in `BEGIN` and `COMMIT` statements.  Should a "retryable" exception be encountered it would likely happen during the `COMMIT` phase which is outside the scope of the method body that contains the imperative retry logic.  In other words, the code that encounters the "retryable" exception is not wrapped by the `retryTemplate`... whoops!  The following implementation behaves correctly:
+  Retry logic is not called above because the declarative `@Transactional` annotation effectively wraps the method body in `BEGIN` and `COMMIT` statements.  Should a "retryable" exception be encountered it would likely happen during the `COMMIT` phase which is outside the scope of the method body that contains the imperative retry logic.  In other words, the code that encounters the "retryable" exception is not wrapped by the `retryTemplate`... whoops!  The following implementation behaves correctly:
   
   ```java
   // Right :)
