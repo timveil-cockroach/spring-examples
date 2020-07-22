@@ -10,6 +10,7 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends CrudRepository<User, UUID> {
 
+    // for testing only
     @Modifying
     @Query(value = "SELECT crdb_internal.force_retry('1s')", nativeQuery = true)
     void forceRetry();
