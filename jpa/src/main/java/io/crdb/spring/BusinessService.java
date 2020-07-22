@@ -25,11 +25,17 @@ public class BusinessService {
 
         User newUser = userRepository.save(user);
 
-        newUser.setStateCode("GA");
+        logger.debug("original state {}", user.getStateCode());
+
+        logger.debug("*********************************** counting user ***********************************");
+
+        long count = userRepository.count();
+
+        logger.debug("count of users: {}", count);
 
         logger.debug("*********************************** updating user ***********************************");
 
-        User gaUser = userRepository.save(newUser);
+        userRepository.save(newUser);
 
         if (forceRetry) {
             logger.debug("*********************************** forcing retry ***********************************");
