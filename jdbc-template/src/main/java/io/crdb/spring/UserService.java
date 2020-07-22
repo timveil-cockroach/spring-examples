@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.ZoneId;
@@ -19,6 +20,8 @@ import java.util.UUID;
 public class UserService {
 
     private static final String INSERT_SQL = "INSERT INTO jdbc_template_users VALUES (?,?,?,?,?,?,?,?,?,?)";
+    public static final String SELECT_SQL = "SELECT * FROM jdbc_template_users WHERE id = ?";
+    public static final String UPDATE_SQL = "UPDATE jdbc_template_users SET updated_timestamp = ? WHERE id = ?";
 
     @Value("${datasource.batch.size}")
     private int batchSize;
@@ -51,18 +54,16 @@ public class UserService {
         final String sql = "SELECT * FROM jdbc_template_users WHERE updated_timestamp IS NULL";
 
         return jdbcTemplate.query(sql,
-                (rs, rowNum) -> new UserDTO(
-                        UUID.fromString(rs.getString("id")),
-                        rs.getString("first_name"),
-                        rs.getString("last_name"),
-                        rs.getString("email"),
-                        rs.getString("address"),
-                        rs.getString("city"),
-                        rs.getString("state_code"),
-                        rs.getString("zip_code"),
-                        fromTimestamp(rs.getTimestamp("created_timestamp")),
-                        fromTimestamp(rs.getTimestamp("updated_timestamp"))
-                )
+                (rs, rowNum) -> getUserFromResultSet(rs)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public UserDTO selectUser(UUID id) {
+
+        return jdbcTemplate.queryForObject(SELECT_SQL,
+                new String[]{id.toString()},
+                (rs, rowNum) -> getUserFromResultSet(rs)
         );
     }
 
@@ -77,9 +78,7 @@ public class UserService {
     @Transactional
     @Retryable(exceptionExpression = "@exceptionChecker.shouldRetry(#root)")
     public int updateUser(UUID id) {
-        final String sql = "UPDATE jdbc_template_users SET updated_timestamp = ? WHERE id = ?";
-
-        return jdbcTemplate.update(sql, Timestamp.from(ZonedDateTime.now().toInstant()), id.toString());
+        return jdbcTemplate.update(UPDATE_SQL, Timestamp.from(ZonedDateTime.now().toInstant()), id.toString());
     }
 
     @Transactional
@@ -98,6 +97,12 @@ public class UserService {
         return jdbcTemplate.update(sql);
     }
 
+    @Transactional
+    public void blocker(UUID id, Runnable runnable) {
+        jdbcTemplate.update(UPDATE_SQL, Timestamp.from(ZonedDateTime.now().toInstant()), id.toString());
+        runnable.run();
+    }
+
     private void mapUserToStatement(PreparedStatement ps, UserDTO user) throws SQLException {
         ps.setString(1, user.getId().toString());
         ps.setString(2, user.getFirstName());
@@ -109,6 +114,21 @@ public class UserService {
         ps.setString(8, user.getZipCode());
         ps.setTimestamp(9, Timestamp.from(user.getCreatedTimestamp().toInstant()));
         ps.setTimestamp(10, null);
+    }
+
+    private UserDTO getUserFromResultSet(ResultSet rs) throws SQLException {
+        return new UserDTO(
+                UUID.fromString(rs.getString("id")),
+                rs.getString("first_name"),
+                rs.getString("last_name"),
+                rs.getString("email"),
+                rs.getString("address"),
+                rs.getString("city"),
+                rs.getString("state_code"),
+                rs.getString("zip_code"),
+                fromTimestamp(rs.getTimestamp("created_timestamp")),
+                fromTimestamp(rs.getTimestamp("updated_timestamp"))
+        );
     }
 
 

@@ -89,6 +89,7 @@ class UserServiceTest {
 
         logger.debug("*********************************** starting updateUser ***********************************");
         int updateUsers = userService.updateUser(user.getId());
+
         logger.debug("*********************************** finished updateUser ***********************************");
     }
 
