@@ -11,8 +11,14 @@ import java.sql.SQLException;
 public class ExceptionChecker {
 
     private static final Logger logger = LoggerFactory.getLogger(ExceptionChecker.class);
+
+    // this is thrown when CRDB needs the client to retry
     private static final String POSTGRES_SERIALIZATION_FAILURE = "40001";
 
+    // the following codes are often encountered when nodes become unavailable during processing
+    private static final String POSTGRES_STATEMENT_COMPLETION_UNKNOWN = "40003";
+    private static final String POSTGRES_CONNECTION_DOES_NOT_EXIST = "08003";
+    private static final String POSTGRES_CONNECTION_FAILURE = "08006";
 
     public boolean shouldRetry(Throwable ex) {
 
@@ -35,14 +41,29 @@ public class ExceptionChecker {
         String sqlState = ex.getSQLState();
         int errorCode = ex.getErrorCode();
 
+        if (errorCode != 0) {
+            return false;
+        }
+
+        if (sqlState == null) {
+            return false;
+        }
+
+        boolean retryable = isRetryableState(sqlState);
+
+        logger.debug("SQLException is retryable? {} : sql state [{}], error code [{}], message [{}]", retryable, sqlState, errorCode, ex.getMessage());
+
+        return retryable;
+    }
+
+    private boolean isRetryableState(String sqlState) {
         // ------------------
         // POSTGRES: https://www.postgresql.org/docs/current/errcodes-appendix.html
         // ------------------
 
-        boolean retryable = errorCode == 0 && POSTGRES_SERIALIZATION_FAILURE.equals(sqlState);
-
-        logger.debug("SQLException is retryable? {} : sql state [{}] and error code [{}]", retryable, sqlState, errorCode);
-
-        return retryable;
+        return POSTGRES_SERIALIZATION_FAILURE.equals(sqlState)
+                || POSTGRES_STATEMENT_COMPLETION_UNKNOWN.equals(sqlState)
+                || POSTGRES_CONNECTION_FAILURE.equals(sqlState)
+                || POSTGRES_CONNECTION_DOES_NOT_EXIST.equals(sqlState);
     }
 }

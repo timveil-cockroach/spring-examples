@@ -22,3 +22,8 @@ Recommendation is to set isolation level in hikari an not at annotation
 
 `spring.datasource.hikari.transaction-isolation=TRANSACTION_SERIALIZABLE` not `@Transactional(isolation = Isolation.SERIALIZABLE)`
 
+
+docker-compose kill crdb-0
+docker-compose kill crdb-1
+docker-compose kill crdb-2
+
