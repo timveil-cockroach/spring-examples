@@ -33,36 +33,26 @@ class UserServiceLoopTest {
 
         int nThreads = Runtime.getRuntime().availableProcessors();
         ExecutorService executorService = Executors.newFixedThreadPool(nThreads);
-        CountDownLatch countDownLatch = new CountDownLatch(nThreads);
 
         logger.info("number of threads {}", nThreads);
 
-
         for (int i = 0; i < nThreads; i++) {
             executorService.submit(() -> {
-                try {
-                    for (int i1 = 0; i1 < 100; i1++) {
-                        User user = userBuilder.buildUser();
-                        logger.debug("calling save #{}", i1);
-                        userService.save(user);
-                    }
-                } finally {
-                    countDownLatch.countDown();
+                while (true) {
+                    User user = userBuilder.buildUser();
+                    userService.save(user);
                 }
             });
         }
 
-        try {
-            boolean cleanExit = countDownLatch.await(1, TimeUnit.HOURS);
-
-            if (!cleanExit) {
-                logger.warn("waiting time elapsed before the count reached zero");
-            }
-        } catch (InterruptedException e) {
-            logger.warn(e.getMessage(), e);
-        }
 
         executorService.shutdown();
+
+        try {
+            executorService.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
