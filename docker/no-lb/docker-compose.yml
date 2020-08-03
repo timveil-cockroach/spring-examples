@@ -1,0 +1,46 @@
+version: '3.5'
+
+services:
+
+  crdb-0:
+    container_name: crdb-0
+    hostname: crdb-0
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=spring-examples --logtostderr=WARNING --log-file-verbosity=WARNING --insecure
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+
+  crdb-1:
+    container_name: crdb-1
+    hostname: crdb-1
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=spring-examples --logtostderr=WARNING --log-file-verbosity=WARNING --insecure --join=crdb-0
+    ports:
+      - "26258:26257"
+      - "8081:8080"
+    depends_on:
+      - crdb-0
+
+
+  crdb-2:
+    container_name: crdb-2
+    hostname: crdb-2
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=spring-examples --logtostderr=WARNING --log-file-verbosity=WARNING --insecure --join=crdb-0
+    ports:
+      - "26259:26257"
+      - "8082:8080"
+    depends_on:
+      - crdb-0
+
+  crdb-init:
+    container_name: crdb-init
+    hostname: crdb-init
+    image: timveil/cockroachdb-remote-client:latest
+    environment:
+      - COCKROACH_HOST=crdb-0:26257
+      - COCKROACH_INSECURE=true
+      - DATABASE_NAME=spring_examples
+    depends_on:
+      - crdb-0
