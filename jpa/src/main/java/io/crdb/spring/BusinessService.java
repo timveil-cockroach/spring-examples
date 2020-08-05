@@ -21,26 +21,32 @@ public class BusinessService {
     @Retryable(exceptionExpression = "@exceptionChecker.shouldRetry(#root)")
     public void someComplexService(User user, boolean forceRetry) {
 
-        logger.debug("*********************************** saving user ***********************************");
+        try {
+            logger.debug("*********************************** saving user ***********************************");
 
-        User newUser = userRepository.save(user);
+            User newUser = userRepository.save(user);
 
-        logger.debug("original state {}", user.getStateCode());
+            logger.debug("original state {}", user.getStateCode());
 
-        logger.debug("*********************************** counting user ***********************************");
+            logger.debug("*********************************** counting user ***********************************");
 
-        long count = userRepository.count();
+            long count = userRepository.count();
 
-        logger.debug("count of users: {}", count);
+            logger.debug("count of users: {}", count);
 
-        logger.debug("*********************************** updating user ***********************************");
+            logger.debug("*********************************** updating user ***********************************");
 
-        userRepository.save(newUser);
+            userRepository.save(newUser);
 
-        if (forceRetry) {
-            logger.debug("*********************************** forcing retry ***********************************");
-            userRepository.forceRetry();
+            if (forceRetry) {
+                logger.debug("*********************************** forcing retry ***********************************");
+                userRepository.forceRetry();
+            }
+
+        } finally {
+            logger.debug("*********************************** method complete ***********************************");
         }
+
 
     }
 
