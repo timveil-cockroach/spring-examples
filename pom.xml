@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.crdb.spring</groupId>
-    <artifactId>crdb-spring-examples</artifactId>
+    <artifactId>spring-examples</artifactId>
     <version>20.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -14,6 +14,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <exclude.devtools>true</exclude.devtools>
+        <skipTests>true</skipTests>
     </properties>
 
     <parent>
@@ -34,7 +35,7 @@
             <dependency>
                 <groupId>io.crdb.spring</groupId>
                 <artifactId>common</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -61,12 +62,14 @@
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 </project>
