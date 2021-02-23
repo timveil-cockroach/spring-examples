@@ -46,6 +46,7 @@
         <module>jdbc-template</module>
         <module>jpa</module>
         <module>common</module>
+        <module>reactive</module>
     </modules>
 
     <dependencies>
