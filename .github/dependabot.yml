@@ -35,3 +35,9 @@ updates:
       interval: "daily"
     assignees:
       - "timveil"
+  - package-ecosystem: "maven"
+    directory: "/reactive"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "timveil"
