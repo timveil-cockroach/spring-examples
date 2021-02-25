@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="DatasourceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="datasource" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="io.crdb.spring.DatasourceApplication" />
+    <option name="ENABLE_LAUNCH_OPTIMIZATION" value="false" />
+    <option name="ENABLE_JMX_AGENT" value="false" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
