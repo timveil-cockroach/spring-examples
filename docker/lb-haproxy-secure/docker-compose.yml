@@ -73,7 +73,7 @@ services:
       - COCKROACH_HOST=lb:26257
       - COCKROACH_INSECURE=false
       - COCKROACH_CERTS_DIR=/certs
-      - DATABASE_NAME=test
+      - DATABASE_NAME=spring_examples
       - DATABASE_USER=test
       - DATABASE_PASSWORD=password
     volumes:
