@@ -1,6 +1,5 @@
 package io.crdb.spring;
 
-import com.github.javafaker.Faker;
 import io.r2dbc.spi.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,6 @@ import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Locale;
 
 @SpringBootApplication
 @EnableR2dbcRepositories
@@ -25,11 +23,6 @@ public class ReactiveApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ReactiveApplication.class, args);
-    }
-
-    @Bean
-    public Faker faker() {
-        return new Faker(Locale.US);
     }
 
     @Bean
