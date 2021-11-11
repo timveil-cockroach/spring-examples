@@ -101,15 +101,15 @@ public class UserService {
     }
 
     private void mapUserToStatement(PreparedStatement ps, UserDTO user) throws SQLException {
-        ps.setString(1, user.getId().toString());
-        ps.setString(2, user.getFirstName());
-        ps.setString(3, user.getLastName());
-        ps.setString(4, user.getEmail());
-        ps.setString(5, user.getAddress());
-        ps.setString(6, user.getCity());
-        ps.setString(7, user.getStateCode());
-        ps.setString(8, user.getZipCode());
-        ps.setTimestamp(9, Timestamp.from(user.getCreatedTimestamp().toInstant()));
+        ps.setString(1, user.id().toString());
+        ps.setString(2, user.firstName());
+        ps.setString(3, user.lastName());
+        ps.setString(4, user.email());
+        ps.setString(5, user.address());
+        ps.setString(6, user.city());
+        ps.setString(7, user.stateCode());
+        ps.setString(8, user.zipCode());
+        ps.setTimestamp(9, Timestamp.from(user.createdTimestamp().toInstant()));
         ps.setTimestamp(10, null);
     }
 

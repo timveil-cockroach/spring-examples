@@ -57,7 +57,7 @@ public class UserServiceRetryTest {
                         int timeout = RandomUtils.nextInt(2, 5);
                         logger.debug("waiting for {} seconds", timeout);
                         try {
-                            userService.blocker(user.getId(), () -> {
+                            userService.blocker(user.id(), () -> {
                                 try {
                                     TimeUnit.SECONDS.sleep(timeout);
                                 } catch (InterruptedException e) {
@@ -69,7 +69,7 @@ public class UserServiceRetryTest {
                         }
 
                         try {
-                            userService.updateUser(user.getId());
+                            userService.updateUser(user.id());
                         } finally {
                             countDownLatch.countDown();
                         }
