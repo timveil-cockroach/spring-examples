@@ -21,7 +21,7 @@ public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    @Value("${datasource.batch.size}")
+    @Value("${demo.batch.size}")
     private int batchSize;
 
     private final DataSource dataSource;

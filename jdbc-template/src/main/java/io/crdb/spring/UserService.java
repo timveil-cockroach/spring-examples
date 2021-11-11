@@ -23,7 +23,7 @@ public class UserService {
     public static final String SELECT_SQL = "SELECT * FROM jdbc_template_users WHERE id = ?";
     public static final String UPDATE_SQL = "UPDATE jdbc_template_users SET updated_timestamp = ? WHERE id = ?";
 
-    @Value("${datasource.batch.size}")
+    @Value("${demo.batch.size}")
     private int batchSize;
 
     private final JdbcTemplate jdbcTemplate;
@@ -42,9 +42,7 @@ public class UserService {
     @Transactional
     @Retryable(exceptionExpression = "@exceptionChecker.shouldRetry(#root)")
     public void insertUser(UserDTO user) {
-        jdbcTemplate.update(INSERT_SQL, ps -> {
-                    mapUserToStatement(ps, user);
-                }
+        jdbcTemplate.update(INSERT_SQL, ps -> mapUserToStatement(ps, user)
         );
     }
 
@@ -60,10 +58,9 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserDTO selectUser(UUID id) {
-
         return jdbcTemplate.queryForObject(SELECT_SQL,
-                new String[]{id.toString()},
-                (rs, rowNum) -> getUserFromResultSet(rs)
+                (rs, rowNum) -> getUserFromResultSet(rs),
+                id.toString()
         );
     }
 

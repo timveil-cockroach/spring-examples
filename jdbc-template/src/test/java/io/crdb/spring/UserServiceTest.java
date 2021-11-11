@@ -46,7 +46,7 @@ class UserServiceTest {
         this.userList = null;
         this.user = null;
 
-        userService.truncate();
+        int truncate = userService.truncate();
 
         logger.debug("*********************************** finished tearDown ***********************************");
     }

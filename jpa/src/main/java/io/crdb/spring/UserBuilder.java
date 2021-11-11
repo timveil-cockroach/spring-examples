@@ -12,7 +12,7 @@ import java.util.UUID;
 @Component
 public class UserBuilder {
 
-    @Value("${datasource.row.size}")
+    @Value("${demo.row.size}")
     private int rowSize;
 
     private final Faker faker;

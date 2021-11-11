@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -49,9 +48,10 @@ class UserServiceLoopTest {
         executorService.shutdown();
 
         try {
-            executorService.awaitTermination(10, TimeUnit.MINUTES);
+            boolean cleanTermination = executorService.awaitTermination(10, TimeUnit.MINUTES);
+            logger.debug("executionService terminated cleanly [{}]", cleanTermination);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage() ,e);
         }
 
     }

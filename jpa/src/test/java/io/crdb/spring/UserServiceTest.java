@@ -47,7 +47,7 @@ class UserServiceTest {
             ids.add(user.getId());
         }
 
-        uuidIterable = () -> ids.iterator();
+        uuidIterable = ids;
     }
 
     @AfterEach

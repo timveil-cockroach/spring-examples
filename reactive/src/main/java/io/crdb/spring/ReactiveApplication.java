@@ -50,9 +50,7 @@ public class ReactiveApplication {
             // fetch all customers
             log.info("Customers found with findAll():");
             log.info("-------------------------------");
-            repository.findAll().doOnNext(customer -> {
-                log.info(customer.toString());
-            }).blockLast(Duration.ofSeconds(10));
+            repository.findAll().doOnNext(customer -> log.info(customer.toString())).blockLast(Duration.ofSeconds(10));
 
             log.info("");
 
@@ -68,10 +66,7 @@ public class ReactiveApplication {
             // fetch customers by last name
             log.info("Customer found with findByLastName('Bauer'):");
             log.info("--------------------------------------------");
-            repository.findByLastName("Bauer").doOnNext(bauer -> {
-                log.info(bauer.toString());
-            }).blockLast(Duration.ofSeconds(10));
-            ;
+            repository.findByLastName("Bauer").doOnNext(bauer -> log.info(bauer.toString())).blockLast(Duration.ofSeconds(10));
             log.info("");
         };
     }

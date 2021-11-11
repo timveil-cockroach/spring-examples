@@ -1,14 +1,14 @@
 {
   "properties": [
     {
-      "name": "datasource.batch.size",
-      "type": "java.lang.Integer",
-      "description": "Batch size."
-    },
-    {
-      "name": "datasource.row.size",
+      "name": "demo.row.size",
       "type": "java.lang.Integer",
       "description": "Rows to generate."
+    },
+    {
+      "name": "demo.batch.size",
+      "type": "java.lang.String",
+      "description": "Batch size."
     }
   ]
 }
