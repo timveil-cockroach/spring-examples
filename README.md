@@ -11,10 +11,10 @@ In addition to basic Database access, the above examples include the use of `spr
 
 ## To Build
 Currently, I do all my testing on an Intel based Mac.  I use Homebrew to install and keep all of my tooling up-to-date ([Maven](https://formulae.brew.sh/formula/maven#default), [JDK](https://formulae.brew.sh/cask/temurin), Docker Desktop, etc.).  To build simply clone the project and run `mvn clean package` from the root directory.  This will create 4 executable jars, one for each access pattern.  They can be found in each module's `target` directory.  For example:
-* datasource/target/datasource-20.0.0-SNAPSHOT.jar
-* jdbc-template/target/jdbc-template-20.0.0-SNAPSHOT.jar
-* jpa/target/jpa-20.0.0-SNAPSHOT.jar
-* reactive/target/reactive-20.0.0-SNAPSHOT.jar
+* `datasource/target/datasource-20.0.0-SNAPSHOT.jar`
+* `jdbc-template/target/jdbc-template-20.0.0-SNAPSHOT.jar`
+* `jpa/target/jpa-20.0.0-SNAPSHOT.jar`
+* `reactive/target/reactive-20.0.0-SNAPSHOT.jar`
 
 # To Run
 First things first you must have a working CockroachDB cluster to use these examples.  In the `docker` folder, I provide 2 examples, `lb-haproxy` and `lb-haproxy-secure`.  These examples use Docker Compose to locally launch 3 node clusters fronted by HAProxy in either a secure or insecure mode.  You can also download the cockroach binary and start a single node cluster or multiple nodes manually.  If you'd like a more scalable way to get started, I highly recommend signing up a forever free Serverless cluster.  To help you get started, I've created a number of example `application.properties` files for each of the typical deployment methods.  These examples can be referenced by their corresponding Spring profile name.  The following profiles are currently supported:
