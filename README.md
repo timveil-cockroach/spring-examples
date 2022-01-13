@@ -25,9 +25,23 @@ To help you get started, I've created a number of example `application.propertie
 * `docker-secure-cert` - also, configured to easily connect to the `lb-haproxy-secure` example found in the `docker` folder.  Unlike the above example, this configuration supports connecting to a `secure` cluster using a client certificate instead of a password
 * `serverless` - this profile provides a template for connecting to a CockroachCloud Serverless cluster which by default is secure.  While similar to `docker-secure-cert` there are a few additional parameters required for connecting to Serverless clusters
 
-Once you've selected your deployment model you can fire up an example like so...
+### Docker
+Running examples using the `docker` profile is very straight forward.  Start the local docker cluster example found in `docker/lb-haproxy`.  Assuming the cluster starts successfully you can run any of the below commands.  Because this profile assumes a cluster is running on `localhost:26257`, this profile can also be used to connect to a single cockroach node started directly using the binary.
+
 ```
-java -jar datasource-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure
+java -jar datasource-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
+java -jar jdbc-template-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
+java -jar jpa-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
+java -jar reactive-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
 ```
-The above command launches the "Datasource" example using the `docker-secure` profile.
+
+### Docker Secure
+todo
+
+### Docker Secure Cert
+todo
+
+### Serverless
+todo
+
 
