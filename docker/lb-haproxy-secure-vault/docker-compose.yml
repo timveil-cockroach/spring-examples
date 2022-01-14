@@ -1,0 +1,111 @@
+version: '3.8'
+
+volumes:
+  certs:
+
+services:
+
+  roach-cert:
+    container_name: roach-cert
+    hostname: roach-cert
+    image: timveil/cockroachdb-dynamic-certs:latest
+    volumes:
+      - certs:/.cockroach-certs
+    environment:
+      - NODE_ALTERNATIVE_NAMES=*.crdb.io localhost
+
+  roach-0:
+    container_name: roach-0
+    hostname: roach-0.crdb.io
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=example-secure --logtostderr=WARNING --log-file-verbosity=WARNING --certs-dir=/certs --listen-addr=roach-0.crdb.io:26257 --advertise-addr=roach-0.crdb.io:26257 --join=roach-0.crdb.io
+    volumes:
+      - certs:/certs:ro
+    depends_on:
+      - roach-cert
+
+  roach-1:
+    container_name: roach-1
+    hostname: roach-1.crdb.io
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=example-secure --logtostderr=WARNING --log-file-verbosity=WARNING --certs-dir=/certs --listen-addr=roach-1.crdb.io:26257 --advertise-addr=roach-1.crdb.io:26257 --join=roach-0.crdb.io
+    volumes:
+      - certs:/certs:ro
+    depends_on:
+      - roach-cert
+      - roach-0
+
+  roach-2:
+    container_name: roach-2
+    hostname: roach-2.crdb.io
+    image: cockroachdb/cockroach:latest
+    command: start --cluster-name=example-secure --logtostderr=WARNING --log-file-verbosity=WARNING --certs-dir=/certs --listen-addr=roach-2.crdb.io:26257 --advertise-addr=roach-2.crdb.io:26257 --join=roach-0.crdb.io
+    volumes:
+      - certs:/certs:ro
+    depends_on:
+      - roach-cert
+      - roach-0
+
+  lb:
+    container_name: lb
+    hostname: lb.crdb.io
+    image: timveil/dynamic-haproxy:latest
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - NODES=roach-0.crdb.io roach-1.crdb.io roach-2.crdb.io
+    depends_on:
+      - roach-0
+      - roach-1
+      - roach-2
+
+  roach-init:
+    container_name: roach-init
+    hostname: roach-init
+    image: timveil/cockroachdb-remote-client:latest
+    environment:
+      - COCKROACH_HOST=roach-0.crdb.io:26257
+      - COCKROACH_INSECURE=false
+      - COCKROACH_INIT=true
+      - COCKROACH_CERTS_DIR=/certs
+      - DATABASE_NAME=spring_examples
+      - DATABASE_USER=test
+      - DATABASE_PASSWORD=password
+    volumes:
+      - certs:/certs:ro
+    depends_on:
+      - lb
+      - roach-cert
+
+  vault-agent-demo:
+    image: hashicorp/vault-enterprise:latest
+    restart: always
+    ports:
+      - "18200:8200"
+    volumes:
+      - ./vault-agent:/vault-agent:rw
+      - ./nginx:/usr/share/nginx/html:rw
+    environment:
+      VAULT_ADDR: "http://vault-dev:8200"
+
+    container_name: vault-agent-demo
+    entrypoint: "vault agent -log-level debug -config=/vault-agent/agent.hcl"
+
+
+  vault-dev:
+    image: hashicorp/vault:latest
+    restart: always
+    volumes:
+      - /vault/data
+      - /etc/vault/logs
+    ports:
+      - "8200:8200/tcp"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: 'root'
+      VAULT_DEV_LISTEN_ADDRESS: '0.0.0.0:8200'
+    cap_add:
+      - IPC_LOCK
+    container_name: vault-dev
+    entrypoint: "vault server -dev"

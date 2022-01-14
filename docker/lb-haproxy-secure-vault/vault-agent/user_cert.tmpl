@@ -1,0 +1,3 @@
+{{ with secret "pki/issue/crdb_node" "common_name=root" "ttl=24h"}}
+{{ .Data.certificate }}
+{{ end }}

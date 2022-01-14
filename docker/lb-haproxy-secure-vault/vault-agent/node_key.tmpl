@@ -1,0 +1,3 @@
+{{ with secret "pki/issue/crdb_node" "common_name=node" "alt_names=$${local_hostname},localhost" "ip_sans=$${local_ipv4},127.0.0.1" "ttl=24h"}}
+{{ .Data.private_key }}
+{{ end }}
