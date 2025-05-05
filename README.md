@@ -36,12 +36,51 @@ java -jar reactive-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
 ```
 
 ### Docker Secure
-todo
+Running examples using the `docker-secure` profile requires a secure CockroachDB cluster. Start the local secure docker cluster example found in `docker/lb-haproxy-secure` by running the `./up.sh` script. This profile uses password authentication to connect to the secure cluster.
+
+```
+java -jar datasource-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure
+java -jar jdbc-template-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure
+java -jar jpa-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure
+java -jar reactive-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure
+```
 
 ### Docker Secure Cert
-todo
+Running examples using the `docker-secure-cert` profile also requires a secure CockroachDB cluster, but uses certificate-based authentication instead of password authentication. Start the local secure docker cluster example found in `docker/lb-haproxy-secure` by running the `./up.sh` script. Then, you need to copy the certificates from the Docker container to a local directory:
+
+```bash
+# Create a directory for certificates
+mkdir -p certs
+
+# Copy certificates from the Docker container
+docker cp roach-cert:/.cockroach-certs/ca.crt ./certs/
+docker cp roach-cert:/.cockroach-certs/client.root.crt ./certs/
+docker cp roach-cert:/.cockroach-certs/client.root.key.pk8 ./certs/
+```
+
+Then run the examples with the `docker-secure-cert` profile, specifying the path to the certificates directory:
+
+```
+java -jar datasource-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure-cert --certs_dir=./certs
+java -jar jdbc-template-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure-cert --certs_dir=./certs
+java -jar jpa-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure-cert --certs_dir=./certs
+java -jar reactive-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker-secure-cert --certs_dir=./certs
+```
 
 ### Serverless
-todo
+To run examples using the `serverless` profile, you need to have a CockroachCloud Serverless cluster. You can sign up for a free Serverless cluster at [CockroachCloud](https://cockroachlabs.cloud/).
 
+Once you have your Serverless cluster:
 
+1. Download the CA certificate for your cluster from the CockroachCloud console
+2. Place the certificate in a directory (e.g., `./certs/serverless.crt`)
+3. Run the examples with the `serverless` profile, providing your cluster details:
+
+```
+java -jar datasource-20.0.0-SNAPSHOT.jar --spring.profiles.active=serverless --certs_dir=./certs --cluster_name=your-cluster-name --username=your-username --password=your-password
+java -jar jdbc-template-20.0.0-SNAPSHOT.jar --spring.profiles.active=serverless --certs_dir=./certs --cluster_name=your-cluster-name --username=your-username --password=your-password
+java -jar jpa-20.0.0-SNAPSHOT.jar --spring.profiles.active=serverless --certs_dir=./certs --cluster_name=your-cluster-name --username=your-username --password=your-password
+java -jar reactive-20.0.0-SNAPSHOT.jar --spring.profiles.active=serverless --certs_dir=./certs --cluster_name=your-cluster-name --username=your-username --password=your-password
+```
+
+Replace `your-cluster-name`, `your-username`, and `your-password` with your actual Serverless cluster details.
