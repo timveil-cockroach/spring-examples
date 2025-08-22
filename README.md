@@ -1,13 +1,45 @@
 # CockroachDB + Spring Boot Examples
 
-This repository is a collection of examples connecting to CockroachDB using the Spring Framework.  While are multiple ways to access databases using the Spring Framework, this repository focuses on the most common patterns:
+This repository is a collection of examples connecting to CockroachDB using the Spring Framework.  While there are multiple ways to access databases using the Spring Framework, this repository focuses on the most common patterns:
 
 * **Datasource** - This example demonstrates how to connect to CockroachDB using the `jakarta.sql.DataSource` interface.  This approach is very powerful as it allows you to interact with JDBC primitives but is less common than the below patterns.  This is a good solution if you need to do something extra special that is not currently handled by higher level abstractions like `JDBCTemplate` 
 * **JDBCTemplate** - JDBCTemplate is a powerful abstraction for native SQL access to CockroachDB.  This is a great solution when JPA/Hibernate is inappropriate or unavailable.  While easier to use than the raw DataSource, it still requires considerable boilerplate code.
 * **JPA** - Perhaps the easiest approach to access data in CockroachDB, JPA allows developers to interact with the database using Java objects instead of native SQL.  This simplicity sometimes comes at the cost of performance but nonetheless is an extremely popular and powerful way to interact with CockroachDB.
 * **Reactive** - In addition to the more traditional forms above, Spring has rich support for building "Reactive" or non-blocking, asynchronous applications.  This support includes Reactive database access.  This example shows how to connect CockroachDB using `r2dbc`.
 
-In addition to basic Database access, the above examples include the use of `spring-retry` for declarative retry logic.  Retry logic highly [recommended](https://www.cockroachlabs.com/docs/v21.1/transactions.html#client-side-intervention) when interacting with CockroachDB and the [Spring Retry](https://github.com/spring-projects/spring-retry) project makes implementing this logic incredibly simple.
+In addition to basic Database access, the above examples include the use of `spring-retry` for declarative retry logic.  Retry logic is highly [recommended](https://www.cockroachlabs.com/docs/stable/transactions.html#client-side-intervention) when interacting with CockroachDB and the [Spring Retry](https://github.com/spring-projects/spring-retry) project makes implementing this logic incredibly simple.
+
+## Prerequisites
+
+* **Java 19+** - This project requires Java 19 or higher
+* **Maven 3.6.3+** - For building the project (or use the included `mvnw` wrapper)
+* **Docker Desktop** - For running local CockroachDB clusters (optional)
+* **CockroachDB** - Either:
+  * Local installation ([Download](https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html))
+  * Docker Compose examples in `docker/` directory
+  * [CockroachCloud Serverless](https://cockroachlabs.cloud/) (free tier available)
+
+## Quick Start
+
+1. Clone the repository and build all modules:
+```bash
+git clone https://github.com/timveil/spring-examples.git
+cd spring-examples
+./mvnw clean package
+```
+
+2. Start a local CockroachDB cluster (easiest option):
+```bash
+cd docker/lb-haproxy
+./up.sh  # On Mac/Linux
+# or
+up.cmd   # On Windows
+```
+
+3. Run an example application:
+```bash
+java -jar jpa/target/jpa-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
+```
 
 ## To Build
 Currently, I do all my testing on an Intel based Mac.  I use Homebrew to install and keep all of my tooling up-to-date ([Maven](https://formulae.brew.sh/formula/maven#default), [JDK](https://formulae.brew.sh/cask/temurin), Docker Desktop, etc.).  To build simply clone the project and run `mvn clean package` from the root directory.  This will create 4 executable jars, one for each access pattern.  They can be found in each module's `target` directory.  For example:
@@ -84,3 +116,41 @@ java -jar reactive-20.0.0-SNAPSHOT.jar --spring.profiles.active=serverless --cer
 ```
 
 Replace `your-cluster-name`, `your-username`, and `your-password` with your actual Serverless cluster details.
+
+## Troubleshooting
+
+### Common Issues
+
+#### Connection Refused
+If you get a connection refused error, ensure:
+- The CockroachDB cluster is running (`docker ps` to check Docker containers)
+- You're using the correct port (26257 for insecure, 26257 for secure)
+- The correct Spring profile is active
+
+#### Certificate Errors
+For secure connections:
+- Ensure certificates are in the correct directory
+- Use absolute paths for certificate locations
+- Check certificate permissions (should be readable)
+- For `r2dbc` connections, certificates must use absolute paths (not classpath references)
+
+#### Retry Logic Not Working
+- Ensure `@EnableRetry` is present on your main application class
+- Check that `@Retryable` annotations are on public methods
+- Verify the exception is actually a retryable SQL state (40001, 40003, 08003, 08006)
+- Review logs for `ExceptionChecker` output to see if exceptions are classified correctly
+
+#### Build Failures
+- Ensure you're using Java 19 or higher: `java -version`
+- Clear Maven cache if needed: `./mvnw clean`
+- For test failures, check database connectivity first
+
+#### Docker Issues
+- If `up.sh` fails on Mac/Linux, ensure it has execute permissions: `chmod +x up.sh`
+- For "port already in use" errors, check for existing processes: `lsof -i :26257`
+- Clean up Docker resources if needed: `docker system prune -a`
+
+### Getting Help
+- Check module-specific README files for detailed configuration
+- Review the [CockroachDB documentation](https://www.cockroachlabs.com/docs/)
+- See [Spring Boot documentation](https://spring.io/projects/spring-boot) for Spring-specific issues
