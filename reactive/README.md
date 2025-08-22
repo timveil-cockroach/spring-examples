@@ -98,14 +98,64 @@ spring.r2dbc.properties.sslKey=/absolute/path/to/client.key
 
 ## Testing
 
-Run tests for this module:
+This module includes comprehensive unit tests for reactive components using Project Reactor's testing utilities.
+
+### Unit Tests
+
+The reactive module provides two main test classes:
+
+**CustomerTest** - Tests the R2DBC entity class:
+- Immutable field validation (firstName/lastName are final)
+- Constructor parameter validation
+- ID field mutability testing
+- Edge cases (null values, empty strings, special characters)
+- Data validation and boundary conditions
+
+**CustomerRepositoryTest** - Tests the reactive repository interface:
+- Reactive stream behavior with StepVerifier
+- Flux operations for findByLastName queries  
+- Error handling in reactive pipelines
+- Empty result set handling
+- Large data set processing
+- Mock-based testing with proper reactive types
+
+### Key Testing Features
+
+- **StepVerifier**: Project Reactor's testing utility for validating Flux/Mono behavior
+- **Reactive Assertions**: Proper verification of asynchronous stream operations
+- **Mock Integration**: Mockito integration with reactive types
+- **Edge Case Coverage**: Null handling, empty collections, error scenarios
+- **Stream Validation**: Confirming correct reactive stream semantics
+
+### Running Tests
+
 ```bash
-# Run all tests
+# Run unit tests (no database required)
+./mvnw test -pl reactive
+
+# Run unit tests with verbose output
 ./mvnw test -pl reactive -DskipTests=false
 
-# Run with specific profile
-./mvnw test -pl reactive -DskipTests=false -Dspring.profiles.active=docker
+# Run specific test class
+./mvnw test -Dtest=CustomerTest -pl reactive
+
+# Run repository tests specifically  
+./mvnw test -Dtest=CustomerRepositoryTest -pl reactive
+
+# Run specific test method
+./mvnw test -Dtest=CustomerTest#shouldCreateCustomerWithParameterizedConstructor -pl reactive
 ```
+
+### Test Development
+
+The unit tests validate reactive programming patterns without requiring database connectivity:
+
+- **Entity Behavior**: Immutable field patterns common in reactive applications
+- **Repository Interfaces**: Reactive repository method signatures and return types
+- **Stream Operations**: Flux/Mono behavior and composition
+- **Error Handling**: Exception propagation in reactive streams
+
+Use these tests for rapid development feedback on reactive components before integration testing with actual database connections.
 
 ## Best Practices and Observations
 ### Certificate Path Requirements

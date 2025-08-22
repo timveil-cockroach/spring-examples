@@ -33,11 +33,17 @@ This is a Spring Boot multi-module Maven project demonstrating various patterns 
 # Run tests for specific module
 ./mvnw test -pl jdbc-template -DskipTests=false
 
+# Run tests for newly created test suites
+./mvnw test -pl common,datasource,reactive -DskipTests=false
+
 # Run specific test class
 ./mvnw test -Dtest=UserServiceTest -pl jpa -DskipTests=false
 
 # Run specific test method
 ./mvnw test -Dtest=UserServiceTest#testSaveUser -pl jpa -DskipTests=false
+
+# Run unit tests only (excludes integration tests)
+./mvnw test -pl common,datasource,reactive -DskipTests=false
 ```
 
 ### Running Applications
@@ -93,3 +99,58 @@ The `docker/` directory contains Docker Compose setups for local CockroachDB clu
 - `lb-haproxy/` - 3-node insecure cluster with HAProxy load balancer
 - `lb-haproxy-secure/` - 3-node secure cluster with certificates and HAProxy
 - `lb-haproxy-secure-vault/` - Secure cluster with HashiCorp Vault integration for certificate management
+
+## Unit Test Coverage
+
+The project includes comprehensive unit test suites for critical business logic and data access patterns:
+
+### Test Structure by Module
+
+**Common Module** (31 tests)
+- `ExceptionCheckerTest` - Tests retry logic for CockroachDB SQL exceptions (40001, 40003, 08003, 08006)
+- `PostgresRetryClassifierTest` - Tests Spring Retry classifier integration 
+- `UserDTOBuilderTest` - Tests data generation utilities with Faker integration
+
+**Datasource Module** (6 tests)
+- `UserServiceTest` - Tests JDBC-based service with connection management, batch processing, and retry logic
+
+**Reactive Module** (21 tests)
+- `CustomerTest` - Tests R2DBC entity with immutable fields and validation
+- `CustomerRepositoryTest` - Tests reactive repository interface with Project Reactor StepVerifier
+
+**JDBC Template Module** - Pre-existing comprehensive integration tests
+- `UserServiceTest` - Tests JdbcTemplate operations with database integration
+- `UserServiceRetryTest` - Tests retry behavior with actual database failures
+
+**JPA Module** - Pre-existing comprehensive integration tests  
+- `UserServiceTest`, `BusinessServiceTest` - Tests JPA repository operations with database integration
+
+### Unit Test Features
+
+**Core Functionality Coverage:**
+- Exception handling and retry logic for CockroachDB serialization failures
+- SQL state validation and error classification
+- Spring Retry integration with custom classifiers
+- JDBC connection management and transaction handling
+- Reactive data access with R2DBC
+
+**Testing Patterns:**
+- Mock-based unit testing with Mockito
+- Reactive testing with StepVerifier (Project Reactor)
+- Edge case validation (null values, empty collections, special characters)
+- Generic type safety and proper dependency injection
+- Comprehensive assertion coverage with descriptive test names
+
+**Test Execution:**
+```bash
+# Run only unit tests (fast, no database required)
+./mvnw test -pl common,datasource,reactive
+
+# Run integration tests (requires database)  
+./mvnw test -pl jdbc-template,jpa
+
+# Run all tests
+./mvnw test -DskipTests=false
+```
+
+The unit tests provide rapid feedback during development and validate core business logic without requiring database connectivity, while integration tests verify end-to-end functionality with actual CockroachDB clusters.

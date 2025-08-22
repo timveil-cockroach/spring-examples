@@ -26,6 +26,9 @@ In addition to basic Database access, the above examples include the use of `spr
 git clone https://github.com/timveil/spring-examples.git
 cd spring-examples
 ./mvnw clean package
+
+# Run with tests included
+./mvnw clean package -DskipTests=false
 ```
 
 2. Start a local CockroachDB cluster (easiest option):
@@ -40,6 +43,59 @@ up.cmd   # On Windows
 ```bash
 java -jar jpa/target/jpa-20.0.0-SNAPSHOT.jar --spring.profiles.active=docker
 ```
+
+## Testing
+
+This project includes comprehensive unit and integration test suites to ensure code quality and validate CockroachDB integration patterns.
+
+### Test Types
+
+**Unit Tests** - Fast, isolated tests that don't require database connectivity:
+- **Common Module** (31 tests) - Tests retry logic, exception handling, and data builders
+- **Datasource Module** (6 tests) - Tests JDBC service layer with mocked dependencies  
+- **Reactive Module** (21 tests) - Tests R2DBC entities and reactive repository interfaces
+
+**Integration Tests** - Full end-to-end tests that require running CockroachDB:
+- **JDBC Template Module** - Tests with actual database operations and retry behavior
+- **JPA Module** - Tests with Hibernate/JPA and database transactions
+
+### Running Tests
+
+```bash
+# Run only unit tests (fast, no database required)
+./mvnw test -pl common,datasource,reactive
+
+# Run integration tests (requires database)
+./mvnw test -pl jdbc-template,jpa -DskipTests=false
+
+# Run all tests (requires database for integration tests)
+./mvnw test -DskipTests=false
+
+# Run specific test class
+./mvnw test -Dtest=ExceptionCheckerTest -pl common -DskipTests=false
+
+# Run specific test method  
+./mvnw test -Dtest=UserServiceTest#shouldInsertUsersSuccessfully -pl datasource -DskipTests=false
+```
+
+### Unit Test Features
+
+- **Mock-based Testing**: Uses Mockito for dependency isolation
+- **Reactive Testing**: StepVerifier for Project Reactor Flux/Mono validation
+- **Retry Logic Testing**: Validates CockroachDB serialization error handling (SQL states 40001, 40003, 08003, 08006)
+- **Edge Case Coverage**: Null handling, empty collections, special characters, and error scenarios
+- **Generic Type Safety**: Proper handling of Spring Retry callbacks and reactive types
+
+### Test Development
+
+The unit tests provide rapid feedback during development without requiring database setup. They validate:
+
+- Core business logic and data transformations
+- Exception handling and retry classification  
+- Spring configuration and dependency injection
+- Data validation and boundary conditions
+
+For development workflows, run unit tests frequently during coding, and run integration tests before committing changes.
 
 ## To Build
 Currently, I do all my testing on an Intel based Mac.  I use Homebrew to install and keep all of my tooling up-to-date ([Maven](https://formulae.brew.sh/formula/maven#default), [JDK](https://formulae.brew.sh/cask/temurin), Docker Desktop, etc.).  To build simply clone the project and run `mvn clean package` from the root directory.  This will create 4 executable jars, one for each access pattern.  They can be found in each module's `target` directory.  For example:
@@ -143,7 +199,14 @@ For secure connections:
 #### Build Failures
 - Ensure you're using Java 19 or higher: `java -version`
 - Clear Maven cache if needed: `./mvnw clean`
-- For test failures, check database connectivity first
+- For integration test failures, check database connectivity first
+- Unit tests should pass without database: `./mvnw test -pl common,datasource,reactive`
+
+#### Test Failures
+- **Unit test failures**: Usually indicate code logic issues, check test output for specific assertion failures
+- **Integration test failures**: Often database connectivity issues, ensure CockroachDB cluster is running
+- **Mock configuration errors**: Check Mockito setup and generic type parameters in test classes
+- **Reactive test failures**: Ensure StepVerifier expectations match actual Flux/Mono behavior
 
 #### Docker Issues
 - If `up.sh` fails on Mac/Linux, ensure it has execute permissions: `chmod +x up.sh`

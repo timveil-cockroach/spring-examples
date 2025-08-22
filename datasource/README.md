@@ -71,14 +71,49 @@ spring.datasource.url=jdbc:postgresql://localhost:26257/defaultdb?sslmode=disabl
 
 ## Testing
 
-Run tests for this module:
+This module includes comprehensive unit tests that validate the JDBC service layer without requiring database connectivity.
+
+### Unit Tests
+
+The `UserServiceTest` class provides complete test coverage for:
+- JDBC connection management and resource cleanup
+- Batch operation handling with PreparedStatement
+- Spring Retry integration with mocked RetryTemplate
+- SQL exception handling and error scenarios
+- Result set mapping and data transformation
+
+Key test features:
+- **Mock-based testing**: Uses Mockito to isolate DataSource and JDBC dependencies
+- **Resource management validation**: Ensures connections and statements are properly closed
+- **Batch processing tests**: Validates batch size configuration and execution
+- **Retry logic testing**: Confirms integration with Spring Retry mechanisms
+- **Edge case coverage**: Tests null values, empty collections, and error scenarios
+
+### Running Tests
+
 ```bash
-# Run all tests
+# Run unit tests (no database required)
+./mvnw test -pl datasource
+
+# Run unit tests with verbose output
 ./mvnw test -pl datasource -DskipTests=false
 
-# Run with specific profile
-./mvnw test -pl datasource -DskipTests=false -Dspring.profiles.active=docker
+# Run specific test class
+./mvnw test -Dtest=UserServiceTest -pl datasource
+
+# Run specific test method
+./mvnw test -Dtest=UserServiceTest#shouldInsertUsersSuccessfully -pl datasource
 ```
+
+### Test Development
+
+The unit tests provide rapid feedback during development and validate:
+- Core business logic without database setup
+- JDBC resource management patterns
+- Exception handling and retry classification
+- Data validation and transformation logic
+
+Run these tests frequently during development to catch issues early without the overhead of database connectivity.
 
 ## Best Practices
 

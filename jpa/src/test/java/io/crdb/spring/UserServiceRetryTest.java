@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.ZonedDateTime;
 import java.util.concurrent.*;
 
-@SpringBootTest
+@SpringBootTest(classes = JpaApplication.class)
 @ActiveProfiles("test")
 public class UserServiceRetryTest {
 

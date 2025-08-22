@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@SpringBootTest
+@SpringBootTest(classes = JpaApplication.class)
 @ActiveProfiles("test")
 class UserServiceTest {
 
