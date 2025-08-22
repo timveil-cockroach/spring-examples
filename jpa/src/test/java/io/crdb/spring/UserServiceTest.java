@@ -1,173 +1,230 @@
 package io.crdb.spring;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@SpringBootTest(classes = JpaApplication.class)
-@ActiveProfiles("test")
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceTest.class);
+    @Mock
+    private UserRepository userRepository;
 
-    private final UserService userService;
-    private final UserBuilder userBuilder;
-
-    @Autowired
-    public UserServiceTest(UserService userService, UserBuilder userBuilder) {
-        this.userService = userService;
-        this.userBuilder = userBuilder;
-    }
-
-    private List<User> userList = null;
-    private User user = null;
-    private Iterable<User> userIterable = null;
-    private Iterable<UUID> uuidIterable = null;
+    private UserService userService;
+    private User testUser;
+    private List<User> testUsers;
+    private List<UUID> testIds;
 
     @BeforeEach
     void setUp() {
-        userList = userBuilder.buildUsers(10);
-        user = userList.get(0);
-        userIterable = () -> userList.iterator();
-
-        List<UUID> ids = new ArrayList<>();
-
-        for (User user : userList) {
-            ids.add(user.getId());
-        }
-
-        uuidIterable = ids;
-    }
-
-    @AfterEach
-    void tearDown() {
-
-        logger.debug("*********************************** starting tearDown ***********************************");
-
-        this.userList = null;
-        this.user = null;
-        this.userIterable = null;
-        this.uuidIterable = null;
-
-        try {
-            userService.deleteAll();
-        } catch (EmptyResultDataAccessException ignored) {
-
-        }
-
-        logger.debug("*********************************** finished tearDown ***********************************");
+        userService = new UserService(userRepository);
+        testUser = createTestUser();
+        testUsers = Arrays.asList(testUser, createTestUser(), createTestUser());
+        testIds = Arrays.asList(UUID.randomUUID(), UUID.randomUUID());
     }
 
     @Test
-    void saveAll() {
-        logger.debug("*********************************** starting saveAll ***********************************");
-        Iterable<User> users = userService.saveAll(userList);
-        logger.debug("*********************************** finished saveAll ***********************************");
+    @DisplayName("Should find all users")
+    void shouldFindAllUsers() {
+        when(userRepository.findAll()).thenReturn(testUsers);
+
+        Iterable<User> result = userService.findAll();
+
+        assertEquals(testUsers, result);
+        verify(userRepository).findAll();
     }
 
     @Test
-    void testSaveAll() {
-        logger.debug("*********************************** starting testSaveAll ***********************************");
-        Iterable<User> users = userService.saveAll(userIterable);
-        logger.debug("*********************************** finished testSaveAll ***********************************");
+    @DisplayName("Should find all users by IDs")
+    void shouldFindAllUsersByIds() {
+        when(userRepository.findAllById(testIds)).thenReturn(testUsers);
+
+        Iterable<User> result = userService.findAll(testIds);
+
+        assertEquals(testUsers, result);
+        verify(userRepository).findAllById(testIds);
     }
 
     @Test
-    void save() {
-        logger.debug("*********************************** starting save ***********************************");
-        User save = userService.save(user);
-        logger.debug("*********************************** finished save ***********************************");
+    @DisplayName("Should find user by ID")
+    void shouldFindUserById() {
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+
+        Optional<User> result = userService.find(testUser.getId());
+
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+        verify(userRepository).findById(testUser.getId());
     }
 
     @Test
-    void findAll() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should return empty optional when user not found")
+    void shouldReturnEmptyOptionalWhenUserNotFound() {
+        UUID nonExistentId = UUID.randomUUID();
+        when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
-        logger.debug("*********************************** starting findAll ***********************************");
-        Iterable<User> all = userService.findAll();
-        logger.debug("*********************************** finished findAll ***********************************");
+        Optional<User> result = userService.find(nonExistentId);
+
+        assertFalse(result.isPresent());
+        verify(userRepository).findById(nonExistentId);
     }
 
     @Test
-    void testFindAll() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should check if user exists")
+    void shouldCheckIfUserExists() {
+        when(userRepository.existsById(testUser.getId())).thenReturn(true);
 
-        logger.debug("*********************************** starting testFindAll ***********************************");
-        Iterable<User> all = userService.findAll(uuidIterable);
-        logger.debug("*********************************** finished testFindAll ***********************************");
+        boolean result = userService.exists(testUser.getId());
+
+        assertTrue(result);
+        verify(userRepository).existsById(testUser.getId());
     }
 
     @Test
-    void find() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should return false when user does not exist")
+    void shouldReturnFalseWhenUserDoesNotExist() {
+        UUID nonExistentId = UUID.randomUUID();
+        when(userRepository.existsById(nonExistentId)).thenReturn(false);
 
-        logger.debug("*********************************** starting find ***********************************");
-        Optional<User> user = userService.find(this.user.getId());
-        logger.debug("*********************************** finished find ***********************************");
+        boolean result = userService.exists(nonExistentId);
+
+        assertFalse(result);
+        verify(userRepository).existsById(nonExistentId);
     }
 
     @Test
-    void exists() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should count all users")
+    void shouldCountAllUsers() {
+        when(userRepository.count()).thenReturn(5L);
 
-        logger.debug("*********************************** starting exists ***********************************");
-        boolean exists = userService.exists(user.getId());
-        logger.debug("*********************************** finished exists ***********************************");
+        long result = userService.count();
+
+        assertEquals(5L, result);
+        verify(userRepository).count();
     }
 
     @Test
-    void count() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should save all users from list")
+    void shouldSaveAllUsersFromList() {
+        when(userRepository.saveAll(testUsers)).thenReturn(testUsers);
 
-        logger.debug("*********************************** starting count ***********************************");
-        long count = userService.count();
-        logger.debug("*********************************** finished count ***********************************");
+        Iterable<User> result = userService.saveAll(testUsers);
+
+        assertEquals(testUsers, result);
+        verify(userRepository).saveAll(testUsers);
     }
 
     @Test
-    void deleteAll() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should save all users from iterable")
+    void shouldSaveAllUsersFromIterable() {
+        Iterable<User> userIterable = testUsers;
+        when(userRepository.saveAll(userIterable)).thenReturn(testUsers);
 
-        logger.debug("*********************************** starting deleteAll ***********************************");
-        userService.deleteAll();
-        logger.debug("*********************************** finished deleteAll ***********************************");
+        Iterable<User> result = userService.saveAll(userIterable);
+
+        assertEquals(testUsers, result);
+        verify(userRepository).saveAll(userIterable);
     }
 
     @Test
-    void testDeleteAll() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should save single user")
+    void shouldSaveSingleUser() {
+        when(userRepository.save(testUser)).thenReturn(testUser);
 
-        logger.debug("*********************************** starting testDeleteAll ***********************************");
-        userService.deleteAll(userIterable);
-        logger.debug("*********************************** finished testDeleteAll ***********************************");
+        User result = userService.save(testUser);
+
+        assertEquals(testUser, result);
+        verify(userRepository).save(testUser);
     }
 
     @Test
-    void delete() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should delete all users")
+    void shouldDeleteAllUsers() {
+        doNothing().when(userRepository).deleteAll();
 
-        logger.debug("*********************************** starting delete ***********************************");
-        userService.delete(user.getId());
-        logger.debug("*********************************** finished delete ***********************************");
+        assertDoesNotThrow(() -> userService.deleteAll());
+
+        verify(userRepository).deleteAll();
     }
 
     @Test
-    void testDelete() {
-        userService.saveAll(userIterable);
+    @DisplayName("Should delete all specified users")
+    void shouldDeleteAllSpecifiedUsers() {
+        doNothing().when(userRepository).deleteAll(testUsers);
 
-        logger.debug("*********************************** starting testDelete ***********************************");
-        userService.delete(user);
-        logger.debug("*********************************** finished testDelete ***********************************");
+        assertDoesNotThrow(() -> userService.deleteAll(testUsers));
+
+        verify(userRepository).deleteAll(testUsers);
+    }
+
+    @Test
+    @DisplayName("Should delete user by ID")
+    void shouldDeleteUserById() {
+        doNothing().when(userRepository).deleteById(testUser.getId());
+
+        assertDoesNotThrow(() -> userService.delete(testUser.getId()));
+
+        verify(userRepository).deleteById(testUser.getId());
+    }
+
+    @Test
+    @DisplayName("Should delete user entity")
+    void shouldDeleteUserEntity() {
+        doNothing().when(userRepository).delete(testUser);
+
+        assertDoesNotThrow(() -> userService.delete(testUser));
+
+        verify(userRepository).delete(testUser);
+    }
+
+    @Test
+    @DisplayName("Should handle empty user list for save all")
+    void shouldHandleEmptyUserListForSaveAll() {
+        List<User> emptyList = Arrays.asList();
+        when(userRepository.saveAll(emptyList)).thenReturn(emptyList);
+
+        Iterable<User> result = userService.saveAll(emptyList);
+
+        assertEquals(emptyList, result);
+        verify(userRepository).saveAll(emptyList);
+    }
+
+    @Test
+    @DisplayName("Should handle null user gracefully")
+    void shouldHandleNullUserGracefully() {
+        when(userRepository.save(null)).thenReturn(null);
+
+        User result = userService.save(null);
+
+        assertNull(result);
+        verify(userRepository).save(null);
+    }
+
+    private User createTestUser() {
+        return new User(
+            UUID.randomUUID(),
+            "John",
+            "Doe",
+            "john.doe@example.com",
+            "123 Main St",
+            "Anytown",
+            "NY",
+            "12345",
+            ZonedDateTime.now(),
+            null
+        );
     }
 }

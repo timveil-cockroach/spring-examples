@@ -15,15 +15,15 @@ import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class UserServiceTest {
+class UserServiceIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceIT.class);
 
     private final UserService userService;
     private final UserDTOBuilder userBuilder;
 
     @Autowired
-    public UserServiceTest(UserService userService, UserDTOBuilder userBuilder) {
+    public UserServiceIT(UserService userService, UserDTOBuilder userBuilder) {
         this.userService = userService;
         this.userBuilder = userBuilder;
     }

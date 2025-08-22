@@ -69,6 +69,38 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <includes>
+                            <include>**/*Test.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/*IT.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <configuration>
+                        <includes>
+                            <include>**/*IT.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/*Test.java</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -79,6 +111,25 @@
             <id>ci</id>
             <properties>
                 <skipTests>false</skipTests>
+                <skipITs>true</skipITs>
+            </properties>
+        </profile>
+        
+        <!-- Profile for running integration tests - requires CockroachDB -->
+        <profile>
+            <id>integration-tests</id>
+            <properties>
+                <skipTests>false</skipTests>
+                <skipITs>false</skipITs>
+            </properties>
+        </profile>
+        
+        <!-- Profile for running all tests (unit + integration) -->
+        <profile>
+            <id>full-test-suite</id>
+            <properties>
+                <skipTests>false</skipTests>
+                <skipITs>false</skipITs>
             </properties>
         </profile>
     </profiles>

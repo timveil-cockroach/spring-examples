@@ -46,14 +46,5 @@
         </plugins>
     </build>
 
-    <profiles>
-        <!-- Skip integration tests in CI (no CockroachDB available) -->
-        <profile>
-            <id>ci</id>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>

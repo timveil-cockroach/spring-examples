@@ -26,41 +26,78 @@ This is a Spring Boot multi-module Maven project demonstrating various patterns 
 ```
 
 ### Running Tests
+
+The project now has a comprehensive testing strategy with unit tests (*Test.java) and integration tests (*IT.java):
+
+#### Unit Tests (Fast, No Database Required)
 ```bash
-# Run all tests (including integration tests - requires CockroachDB)
+# Run all unit tests - for CI/GitHub Actions
 ./mvnw test -DskipTests=false
 
-# Run tests for specific module
+# Run unit tests for specific module
 ./mvnw test -pl jdbc-template -DskipTests=false
 
-# Run tests for newly created test suites
-./mvnw test -pl common,datasource,reactive -DskipTests=false
-
-# Run specific test class
+# Run specific unit test class
 ./mvnw test -Dtest=UserServiceTest -pl jpa -DskipTests=false
 
-# Run specific test method
-./mvnw test -Dtest=UserServiceTest#testSaveUser -pl jpa -DskipTests=false
-
-# Run unit tests only (excludes integration tests) - for CI/GitHub Actions
-./mvnw test -Pci
-
-# Run unit tests only (manual alternative)
-./mvnw test -pl common,datasource,reactive -DskipTests=false
+# Run specific unit test method
+./mvnw test -Dtest=UserServiceTest#shouldFindAllUsers -pl jpa -DskipTests=false
 ```
 
-### CI/GitHub Actions Profile
-The project includes a `ci` Maven profile designed for continuous integration environments where CockroachDB is not available:
-
+#### Integration Tests (Require CockroachDB)
 ```bash
-# Use this command in GitHub Actions
-./mvnw test -Pci
+# Run all integration tests - requires running CockroachDB
+./mvnw verify -Pintegration-tests
+
+# Run integration tests for specific module
+./mvnw verify -pl jdbc-template -Pintegration-tests
+
+# Run specific integration test class
+./mvnw verify -Dtest=UserServiceIT -pl jpa -Pintegration-tests
 ```
 
-This profile:
-- Runs all unit tests in `common`, `datasource`, and `reactive` modules (58 tests)
-- Skips integration tests in `jdbc-template` and `jpa` modules (which require CockroachDB)
-- Ensures fast feedback without external database dependencies
+#### Combined Testing
+```bash
+# Run both unit and integration tests - for full local testing
+./mvnw verify -Pfull-test-suite
+
+# Run all tests with default profile (unit tests only, integration tests skipped)
+./mvnw test -DskipTests=false
+```
+
+### Testing Strategy Overview
+
+**Unit Tests (*Test.java)**: 72 tests across all modules
+- Test business logic with mocks and stubs
+- No external dependencies (database, network)
+- Fast execution (< 5 seconds)
+- Run in CI/GitHub Actions
+
+**Integration Tests (*IT.java)**: 23 tests in jdbc-template and jpa modules  
+- Test actual CockroachDB integration
+- Require running CockroachDB cluster
+- Comprehensive end-to-end validation
+- Run locally and in staging environments
+
+### Maven Profiles
+
+#### Default Profile
+- **Unit tests**: ✅ Runs (*Test.java files)
+- **Integration tests**: ❌ Skips (*IT.java files)
+- **Usage**: `./mvnw test -DskipTests=false`
+- **Purpose**: Fast feedback for CI/GitHub Actions
+
+#### Integration Tests Profile (`-Pintegration-tests`)
+- **Unit tests**: ✅ Runs (*Test.java files)  
+- **Integration tests**: ✅ Runs (*IT.java files)
+- **Usage**: `./mvnw verify -Pintegration-tests`
+- **Purpose**: Full testing with CockroachDB
+
+#### Full Test Suite Profile (`-Pfull-test-suite`)
+- **Unit tests**: ✅ Runs (*Test.java files)
+- **Integration tests**: ✅ Runs (*IT.java files)
+- **Usage**: `./mvnw verify -Pfull-test-suite`
+- **Purpose**: Complete testing for releases
 
 ### Running Applications
 Each module produces an executable JAR. Use Spring profiles to configure database connections:
@@ -116,11 +153,13 @@ The `docker/` directory contains Docker Compose setups for local CockroachDB clu
 - `lb-haproxy-secure/` - 3-node secure cluster with certificates and HAProxy
 - `lb-haproxy-secure-vault/` - Secure cluster with HashiCorp Vault integration for certificate management
 
-## Unit Test Coverage
+## Comprehensive Test Coverage
 
-The project includes comprehensive unit test suites for critical business logic and data access patterns:
+The project includes both unit tests and integration tests following a clear separation strategy:
 
 ### Test Structure by Module
+
+#### Unit Tests (*Test.java) - 72 Total Tests
 
 **Common Module** (31 tests)
 - `ExceptionCheckerTest` - Tests retry logic for CockroachDB SQL exceptions (40001, 40003, 08003, 08006)
@@ -128,45 +167,61 @@ The project includes comprehensive unit test suites for critical business logic 
 - `UserDTOBuilderTest` - Tests data generation utilities with Faker integration
 
 **Datasource Module** (6 tests)
-- `UserServiceTest` - Tests JDBC-based service with connection management, batch processing, and retry logic
+- `UserServiceTest` - Tests JDBC-based service with mocks for connection management, batch processing, and retry logic
+
+**JDBC Template Module** (14 tests)
+- `UserServiceUnitTest` - Tests JdbcTemplate operations with mocks for SQL execution and batch operations
+- `JdbcTemplateApplicationTest` - Tests Spring application configuration and bean creation
+
+**JPA Module** (16 tests)
+- `UserServiceTest` - Tests JPA service operations with repository mocks
+- `BusinessServiceTest` - Tests complex business logic with transaction handling
+- `UserBuilderTest` - Tests data generation with Faker mocks
+- `JpaApplicationTest` - Tests Spring application configuration and bean creation
 
 **Reactive Module** (21 tests)
 - `CustomerTest` - Tests R2DBC entity with immutable fields and validation
 - `CustomerRepositoryTest` - Tests reactive repository interface with Project Reactor StepVerifier
 
-**JDBC Template Module** - Pre-existing comprehensive integration tests
-- `UserServiceTest` - Tests JdbcTemplate operations with database integration
-- `UserServiceRetryTest` - Tests retry behavior with actual database failures
+#### Integration Tests (*IT.java) - 23 Total Tests
 
-**JPA Module** - Pre-existing comprehensive integration tests  
-- `UserServiceTest`, `BusinessServiceTest` - Tests JPA repository operations with database integration
+**JDBC Template Module** (7 tests)
+- `UserServiceIT` - Tests actual JdbcTemplate operations with CockroachDB integration
+- `UserServiceRetryIT` - Tests retry behavior with actual database failures and concurrent access
 
-### Unit Test Features
+**JPA Module** (16 tests)
+- `UserServiceIT` - Tests JPA repository operations with database integration
+- `BusinessServiceIT` - Tests complex business service with actual transactions
+- `UserServiceLoopIT` - Tests concurrent access patterns
+- `UserServiceRetryIT` - Tests retry behavior with actual database failures
 
-**Core Functionality Coverage:**
-- Exception handling and retry logic for CockroachDB serialization failures
-- SQL state validation and error classification
-- Spring Retry integration with custom classifiers
-- JDBC connection management and transaction handling
-- Reactive data access with R2DBC
+### Test Features
 
-**Testing Patterns:**
-- Mock-based unit testing with Mockito
-- Reactive testing with StepVerifier (Project Reactor)
-- Edge case validation (null values, empty collections, special characters)
-- Generic type safety and proper dependency injection
-- Comprehensive assertion coverage with descriptive test names
+#### Unit Test Capabilities
+- **Mock-based testing**: Uses Mockito for dependency isolation
+- **Fast execution**: Complete suite runs in < 5 seconds
+- **No external dependencies**: Tests run without database or network
+- **Business logic validation**: Comprehensive coverage of service methods, edge cases, and error handling
+- **Framework integration**: Tests Spring configuration, retry policies, and bean creation
 
-**Test Execution:**
-```bash
-# Run only unit tests (fast, no database required)
-./mvnw test -pl common,datasource,reactive
+#### Integration Test Capabilities  
+- **Real database testing**: Uses actual CockroachDB for end-to-end validation
+- **Transaction testing**: Validates ACID properties and retry logic
+- **Concurrent access**: Tests serialization conflicts and retry behavior
+- **Performance validation**: Tests batch operations and large datasets
 
-# Run integration tests (requires database)  
-./mvnw test -pl jdbc-template,jpa
+### Testing Best Practices
 
-# Run all tests
-./mvnw test -DskipTests=false
-```
+**Naming Conventions:**
+- Unit tests: `*Test.java` (e.g., `UserServiceTest.java`)
+- Integration tests: `*IT.java` (e.g., `UserServiceIT.java`)
 
-The unit tests provide rapid feedback during development and validate core business logic without requiring database connectivity, while integration tests verify end-to-end functionality with actual CockroachDB clusters.
+**Mock Strategy:**
+- Unit tests mock all external dependencies (repositories, databases, services)
+- Integration tests use real CockroachDB connections
+- Test data generated with controlled mocks (Faker) for predictable results
+
+**Assertion Patterns:**
+- Descriptive test method names with `@DisplayName` annotations
+- Comprehensive edge case coverage (null inputs, empty collections, error conditions)
+- Verification of both return values and side effects (method calls, database state)

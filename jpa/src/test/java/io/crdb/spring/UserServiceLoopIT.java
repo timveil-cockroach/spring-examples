@@ -13,15 +13,15 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class UserServiceLoopTest {
+class UserServiceLoopIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceLoopTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceLoopIT.class);
 
     private final UserService userService;
     private final UserBuilder userBuilder;
 
     @Autowired
-    public UserServiceLoopTest(UserService userService, UserBuilder userBuilder) {
+    public UserServiceLoopIT(UserService userService, UserBuilder userBuilder) {
         this.userService = userService;
         this.userBuilder = userBuilder;
     }

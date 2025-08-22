@@ -19,15 +19,15 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class UserServiceRetryTest {
+public class UserServiceRetryIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceRetryTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceRetryIT.class);
 
     private final UserService userService;
     private final UserDTOBuilder userBuilder;
 
     @Autowired
-    public UserServiceRetryTest(UserService userService, UserDTOBuilder userBuilder) {
+    public UserServiceRetryIT(UserService userService, UserDTOBuilder userBuilder) {
         this.userService = userService;
         this.userBuilder = userBuilder;
     }

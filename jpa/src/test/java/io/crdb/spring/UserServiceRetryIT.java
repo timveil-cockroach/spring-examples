@@ -14,15 +14,15 @@ import java.util.concurrent.*;
 
 @SpringBootTest(classes = JpaApplication.class)
 @ActiveProfiles("test")
-public class UserServiceRetryTest {
+public class UserServiceRetryIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceRetryTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceRetryIT.class);
 
     private final UserService userService;
     private final UserBuilder userBuilder;
 
     @Autowired
-    public UserServiceRetryTest(UserService userService, UserBuilder userBuilder) {
+    public UserServiceRetryIT(UserService userService, UserBuilder userBuilder) {
         this.userService = userService;
         this.userBuilder = userBuilder;
     }
