@@ -111,9 +111,6 @@ class BusinessServiceTest {
     @Test
     @DisplayName("Should handle null user input")
     void shouldHandleNullUserInput() {
-        when(userRepository.save(null)).thenReturn(null);
-        when(userRepository.count()).thenReturn(0L);
-
         // The method will throw NPE when trying to access user.getStateCode() on null user
         assertThrows(NullPointerException.class, () -> businessService.someComplexService(null, false));
 
