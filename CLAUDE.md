@@ -27,7 +27,7 @@ This is a Spring Boot multi-module Maven project demonstrating various patterns 
 
 ### Running Tests
 ```bash
-# Run all tests
+# Run all tests (including integration tests - requires CockroachDB)
 ./mvnw test -DskipTests=false
 
 # Run tests for specific module
@@ -42,9 +42,25 @@ This is a Spring Boot multi-module Maven project demonstrating various patterns 
 # Run specific test method
 ./mvnw test -Dtest=UserServiceTest#testSaveUser -pl jpa -DskipTests=false
 
-# Run unit tests only (excludes integration tests)
+# Run unit tests only (excludes integration tests) - for CI/GitHub Actions
+./mvnw test -Pci
+
+# Run unit tests only (manual alternative)
 ./mvnw test -pl common,datasource,reactive -DskipTests=false
 ```
+
+### CI/GitHub Actions Profile
+The project includes a `ci` Maven profile designed for continuous integration environments where CockroachDB is not available:
+
+```bash
+# Use this command in GitHub Actions
+./mvnw test -Pci
+```
+
+This profile:
+- Runs all unit tests in `common`, `datasource`, and `reactive` modules (58 tests)
+- Skips integration tests in `jdbc-template` and `jpa` modules (which require CockroachDB)
+- Ensures fast feedback without external database dependencies
 
 ### Running Applications
 Each module produces an executable JAR. Use Spring profiles to configure database connections:
