@@ -34,6 +34,10 @@ jobs:
     name: Build and Test
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    permissions:
+      contents: read
+      checks: write  # Required for test-reporter
+      pull-requests: write  # Required for PR comments
     
     strategy:
       fail-fast: false
@@ -73,13 +77,23 @@ jobs:
     - name: Run Tests
       run: mvn -B test -DskipTests=false --file pom.xml
       
-    - name: Generate Test Report
+    # Test reporting - use different approach for forks vs main repo
+    - name: Generate Test Report (Main Repo)
       uses: dorny/test-reporter@v1
-      if: success() || failure()
+      if: (success() || failure()) && github.event_name != 'pull_request'
       with:
         name: Maven Tests - Java ${{ matrix.java }}
         path: '**/target/surefire-reports/TEST-*.xml'
         reporter: java-junit
+        
+    # For PRs from forks, upload as artifact instead (due to permission restrictions)
+    - name: Upload Test Results
+      if: (success() || failure()) && github.event_name == 'pull_request'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-java-${{ matrix.java }}
+        path: '**/target/surefire-reports/TEST-*.xml'
+        retention-days: 7
         
     - name: Package Application
       run: mvn -B package -DskipTests --file pom.xml
