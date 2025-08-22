@@ -73,4 +73,14 @@
         </pluginManagement>
     </build>
 
+    <profiles>
+        <!-- Profile for CI/GitHub Actions - runs only unit tests, skips integration tests -->
+        <profile>
+            <id>ci</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>
