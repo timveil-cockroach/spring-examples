@@ -1,43 +1,150 @@
 # To get started with Dependabot version updates, you'll need to specify which
 # package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
-# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
 updates:
+  # Root pom.xml and all submodules
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
     assignees:
       - "timveil"
+    labels:
+      - "dependencies"
+      - "maven"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      spring-dependencies:
+        patterns:
+          - "org.springframework*"
+          - "io.spring*"
+        update-types:
+          - "minor"
+          - "patch"
+      test-dependencies:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*assertj*"
+    ignore:
+      # Example: Ignore major versions of Spring Boot to control upgrades manually
+      # - dependency-name: "org.springframework.boot"
+      #   update-types: ["version-update:semver-major"]
+  
+  # Submodules - using a more concise configuration since Maven handles transitive dependencies
   - package-ecosystem: "maven"
     directory: "/common"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
     assignees:
       - "timveil"
+    labels:
+      - "dependencies"
+      - "maven"
+      - "common-module"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
   - package-ecosystem: "maven"
     directory: "/datasource"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
     assignees:
       - "timveil"
+    labels:
+      - "dependencies"
+      - "maven"
+      - "datasource-module"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
   - package-ecosystem: "maven"
     directory: "/jdbc-template"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
     assignees:
       - "timveil"
+    labels:
+      - "dependencies"
+      - "maven"
+      - "jdbc-template-module"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
   - package-ecosystem: "maven"
     directory: "/jpa"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
     assignees:
       - "timveil"
+    labels:
+      - "dependencies"
+      - "maven"
+      - "jpa-module"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
   - package-ecosystem: "maven"
     directory: "/reactive"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
     assignees:
       - "timveil"
+    labels:
+      - "dependencies"
+      - "maven"
+      - "reactive-module"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    assignees:
+      - "timveil"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

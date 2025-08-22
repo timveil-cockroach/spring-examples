@@ -1,29 +1,131 @@
 # This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
 
 name: Java CI with Maven
 
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'docker/**'
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'docker/**'
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Set minimal permissions
+permissions:
+  contents: read
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        java: [19, 21]
+        include:
+          - java: 19
+            java-distribution: 'temurin'
+          - java: 21
+            java-distribution: 'temurin'
 
     steps:
     - name: Checkout Project
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better analysis
 
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: ${{ matrix.java-distribution }}
+        cache: 'maven'
+        
+    - name: Cache Maven Dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Compile Project
+      run: mvn -B clean compile --file pom.xml
+
+    - name: Run Tests
+      run: mvn -B test -DskipTests=false --file pom.xml
+      
+    - name: Generate Test Report
+      uses: dorny/test-reporter@v1
+      if: success() || failure()
+      with:
+        name: Maven Tests - Java ${{ matrix.java }}
+        path: '**/target/surefire-reports/TEST-*.xml'
+        reporter: java-junit
+        
+    - name: Package Application
+      run: mvn -B package -DskipTests --file pom.xml
+      
+    - name: Upload Build Artifacts
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-java-${{ matrix.java }}
+        path: |
+          **/target/surefire-reports/
+          **/target/*.log
+        retention-days: 7
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      
+    steps:
+    - name: Checkout Project
+      uses: actions/checkout@v4
+      
+    - name: Dependency Review
+      uses: actions/dependency-review-action@v4
+      with:
+        fail-on-severity: moderate
+        
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout Project
+      uses: actions/checkout@v4
+      
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
         java-version: 19
-        cache: 'maven'
         distribution: 'temurin'
-
-    - name: Build with Maven
-      run: mvn -B compile -DskipTests --file pom.xml
+        cache: 'maven'
+        
+    - name: Verify Code Formatting
+      run: mvn -B verify -DskipTests --file pom.xml
