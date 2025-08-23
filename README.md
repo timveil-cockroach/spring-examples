@@ -1,5 +1,10 @@
 # CockroachDB + Spring Boot Examples
 
+[![Java CI with Maven](https://github.com/timveil/spring-examples/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/timveil/spring-examples/actions/workflows/maven.yml)
+[![Java](https://img.shields.io/badge/Java-19+-orange.svg)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Maven](https://img.shields.io/badge/Maven-3.6.3+-red.svg)](https://maven.apache.org/)
+
 This repository is a collection of examples connecting to CockroachDB using the Spring Framework.  While there are multiple ways to access databases using the Spring Framework, this repository focuses on the most common patterns:
 
 * **Datasource** - This example demonstrates how to connect to CockroachDB using the `jakarta.sql.DataSource` interface.  This approach is very powerful as it allows you to interact with JDBC primitives but is less common than the below patterns.  This is a good solution if you need to do something extra special that is not currently handled by higher level abstractions like `JDBCTemplate` 
