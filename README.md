@@ -1,6 +1,6 @@
 # CockroachDB + Spring Boot Examples
 
-[![Java CI with Maven](https://github.com/timveil/spring-examples/actions/workflows/maven.yml/badge.svg)](https://github.com/timveil/spring-examples/actions/workflows/maven.yml)
+[![Java CI with Maven](https://github.com/timveil-cockroach/spring-examples/actions/workflows/maven.yml/badge.svg)](https://github.com/timveil-cockroach/spring-examples/actions/workflows/maven.yml)
 [![Java](https://img.shields.io/badge/Java-19+-orange.svg)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.6.3+-red.svg)](https://maven.apache.org/)
