@@ -23,24 +23,53 @@ updates:
       prefix: "chore"
       include: "scope"
     groups:
-      spring-dependencies:
+      spring-boot:
         patterns:
-          - "org.springframework*"
+          - "org.springframework.boot*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-framework:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.data*"
+          - "org.springframework.security*"
           - "io.spring*"
         update-types:
           - "minor"
           - "patch"
-      test-dependencies:
+      testing:
         patterns:
           - "*junit*"
           - "*mockito*"
           - "*assertj*"
+          - "*hamcrest*"
+        update-types:
+          - "minor"
+          - "patch"
+      logging:
+        patterns:
+          - "org.slf4j*"
+          - "ch.qos.logback*"
+          - "org.apache.logging*"
+        update-types:
+          - "minor"
+          - "patch"
+      database:
+        patterns:
+          - "org.postgresql*"
+          - "io.r2dbc*"
+          - "org.flywaydb*"
+          - "org.liquibase*"
+        update-types:
+          - "minor"
+          - "patch"
     ignore:
       # Example: Ignore major versions of Spring Boot to control upgrades manually
       # - dependency-name: "org.springframework.boot"
       #   update-types: ["version-update:semver-major"]
-  
-  # Submodules - using a more concise configuration since Maven handles transitive dependencies
+
+  # Submodules - using shared group configuration
   - package-ecosystem: "maven"
     directory: "/common"
     schedule:
@@ -58,7 +87,30 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-  
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework.boot*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-framework:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.data*"
+          - "io.spring*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*assertj*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "maven"
     directory: "/datasource"
     schedule:
@@ -76,7 +128,30 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-  
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework.boot*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-framework:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.data*"
+          - "io.spring*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*assertj*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "maven"
     directory: "/jdbc-template"
     schedule:
@@ -94,7 +169,30 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-  
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework.boot*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-framework:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.data*"
+          - "io.spring*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*assertj*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "maven"
     directory: "/jpa"
     schedule:
@@ -112,7 +210,36 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-  
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework.boot*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-framework:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.data*"
+          - "io.spring*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*assertj*"
+        update-types:
+          - "minor"
+          - "patch"
+      hibernate:
+        patterns:
+          - "org.hibernate*"
+        update-types:
+          - "minor"
+          - "patch"
+
   - package-ecosystem: "maven"
     directory: "/reactive"
     schedule:
@@ -130,7 +257,43 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-  
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework.boot*"
+        update-types:
+          - "minor"
+          - "patch"
+      spring-framework:
+        patterns:
+          - "org.springframework:*"
+          - "org.springframework.data*"
+          - "io.spring*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "*junit*"
+          - "*mockito*"
+          - "*assertj*"
+        update-types:
+          - "minor"
+          - "patch"
+      r2dbc:
+        patterns:
+          - "io.r2dbc*"
+          - "*r2dbc*"
+        update-types:
+          - "minor"
+          - "patch"
+      reactor:
+        patterns:
+          - "io.projectreactor*"
+        update-types:
+          - "minor"
+          - "patch"
+
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -148,3 +311,10 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
