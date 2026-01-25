@@ -24,16 +24,59 @@ jobs:
       with:
         github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-    - name: Auto-Merge Minor and Patch Updates
+    - name: Approve PR
       if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
-      run: gh pr merge --auto --squash "$PR_URL"
+      run: gh pr review --approve "$PR_URL"
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Approve PR
+    - name: Enable Auto-Merge with Retry
       if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
-      run: gh pr review --approve "$PR_URL"
+      run: |
+        # Function to enable automerge with retries
+        enable_automerge() {
+          local max_attempts=5
+          local attempt=1
+          local wait_time=10
+
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts to enable auto-merge..."
+
+            # Update PR branch to latest base branch
+            if gh pr view "$PR_URL" --json mergeable | grep -q '"mergeable":"CONFLICTING"'; then
+              echo "PR has conflicts, cannot auto-merge"
+              exit 1
+            fi
+
+            # Try to update the branch first
+            echo "Updating PR branch..."
+            gh pr update-branch "$PR_URL" || echo "Branch update not needed or failed"
+
+            # Wait a moment for GitHub to process the update
+            sleep 5
+
+            # Try to enable automerge
+            if gh pr merge --auto --squash "$PR_URL" 2>&1; then
+              echo "Auto-merge enabled successfully!"
+              return 0
+            fi
+
+            if [ $attempt -lt $max_attempts ]; then
+              echo "Failed to enable auto-merge. Waiting ${wait_time}s before retry..."
+              sleep $wait_time
+              # Exponential backoff
+              wait_time=$((wait_time * 2))
+            fi
+
+            attempt=$((attempt + 1))
+          done
+
+          echo "Failed to enable auto-merge after $max_attempts attempts"
+          exit 1
+        }
+
+        enable_automerge
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

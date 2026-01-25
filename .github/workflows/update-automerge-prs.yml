@@ -1,0 +1,66 @@
+# Update Dependabot PRs with automerge enabled when base branch changes
+# This helps resolve stuck automerges due to base branch modifications
+
+name: Update Auto-Merge PRs
+
+on:
+  # Run when pushes happen to master (after PRs merge)
+  push:
+    branches:
+      - master
+  # Also run on a schedule to catch any stuck PRs
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-prs:
+    name: Update Dependabot PRs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Update Dependabot PRs with Auto-Merge Enabled
+      run: |
+        echo "Searching for Dependabot PRs with auto-merge enabled..."
+
+        # Get all open PRs by dependabot with auto-merge enabled
+        prs=$(gh pr list \
+          --author "dependabot[bot]" \
+          --state open \
+          --json number,autoMergeRequest,headRefName,url \
+          --jq '.[] | select(.autoMergeRequest != null) | .number')
+
+        if [ -z "$prs" ]; then
+          echo "No Dependabot PRs with auto-merge enabled found"
+          exit 0
+        fi
+
+        echo "Found PRs: $prs"
+
+        for pr_number in $prs; do
+          echo "Processing PR #$pr_number..."
+
+          # Check if PR is mergeable
+          mergeable=$(gh pr view $pr_number --json mergeable --jq '.mergeable')
+
+          if [ "$mergeable" = "CONFLICTING" ]; then
+            echo "PR #$pr_number has conflicts, skipping..."
+            continue
+          fi
+
+          # Try to update the branch
+          echo "Updating PR #$pr_number branch..."
+          if gh pr view $pr_number --json headRefName --jq '.headRefName' | grep -q "dependabot"; then
+            gh pr update-branch $pr_number || echo "Branch update failed or not needed for PR #$pr_number"
+          fi
+        done
+
+        echo "Finished updating Dependabot PRs"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
